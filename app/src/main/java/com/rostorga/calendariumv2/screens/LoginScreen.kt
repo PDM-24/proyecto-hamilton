@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -74,8 +75,10 @@ fun LoginScreen(navController: NavController) {
                 Image(painter = painterResource(id = R.drawable.lock_icon), contentDescription = "Profile Icon")
                 inputField(output = password, onClick = {password = it}, placeholderArg = "PassWord")
             }
-            
-
+        }
+        Spacer(modifier = Modifier.height(40.dp))
+        Button(onClick = { navController.navigate(Screen.MainScreen.route)}) {
+            Text(text = "CLICK ME")
         }
 
         Image(
