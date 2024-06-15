@@ -7,6 +7,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -39,6 +40,8 @@ import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
 import java.time.LocalDate
+import com.rostorga.calendariumv2.screens.profileScreen
+import com.rostorga.calendariumv2.screens.CreateOrJoinTeam
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -56,6 +59,14 @@ fun ViewContainer() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToolBar() {
+
+    var showProfile by remember { mutableStateOf(false) }
+
+    if (showProfile) {
+        profileScreen(onDismiss = { showProfile = false })
+    }
+
+
     TopAppBar(title = {
         Row(
             modifier = Modifier
@@ -65,7 +76,7 @@ fun ToolBar() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(painter = painterResource(id = R.drawable.menuicon), contentDescription = null, modifier = Modifier.size(36.dp))
-            Image(painter = painterResource(id = R.drawable.user), contentDescription = null, modifier = Modifier.size(36.dp))
+            Image(painter = painterResource(id = R.drawable.user), contentDescription = null, modifier = Modifier.size(36.dp).clickable{showProfile=true})
         }
     })
 }
@@ -174,6 +185,13 @@ fun CalendarDialogPopUp(
 fun HomeScreenContent() {
     var date by remember { mutableStateOf(" ") }
 
+    var showCreateTeam by remember { mutableStateOf(false) }
+
+    if (showCreateTeam) {
+        CreateOrJoinTeam(onDismiss = { showCreateTeam = false })
+    }
+
+
     val stroke = Stroke(
         width = 2f,
         pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
@@ -184,8 +202,47 @@ fun HomeScreenContent() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("TODO CREATE THE LITTLE BAR THAT TRACKS THE WORKLOAD OF THE FIGMA")
-        Text("TODO JOIN OR CREATE A TEAM LIKE IN THE FIGMA")
+
+// this one should be on the right and should be thinner xd but i dont care right now
+        Row(modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically){
+            Box(
+                Modifier
+                    .size(150.dp, 30.dp)
+                    .background(Color(0xFFBA74A8), shape = RoundedCornerShape(15.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(textAlign = TextAlign.Center, text = "New rounded box")
+            }
+        }
+
+        Spacer(modifier=Modifier.padding(4.dp))
+
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+//this box has to be clickable
+            Box(
+                Modifier
+                    .size(150.dp, 30.dp).clickable{showCreateTeam=true}
+                    .drawBehind {
+                        drawRoundRect(
+                            color = Color(0xFFBA74A8),
+                            style = stroke,
+                            cornerRadius = CornerRadius(10.dp.toPx())
+                        )
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(textAlign = TextAlign.Center, text = "Create or join a team!")
+            }
+
+        }
+
+
 
         Box(
             modifier = Modifier
