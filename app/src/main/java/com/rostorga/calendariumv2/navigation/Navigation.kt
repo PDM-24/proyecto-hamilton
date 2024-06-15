@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.rostorga.calendariumv2.screens.LoginScreen
+import com.rostorga.calendariumv2.screens.PlannerScreen
 import com.rostorga.calendariumv2.screens.Screen
 
 
@@ -18,12 +19,15 @@ import com.rostorga.calendariumv2.screens.Screen
 @Composable
 fun Navigation(){
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.LoginScreen.route){
+    NavHost(navController = navController, startDestination = Screen.PlannerScreen.route){
         composable(route = Screen.MainScreen.route){
             ViewContainer(navController = navController)
         }
         composable(route = Screen.LoginScreen.route   ){
             LoginScreen(navController = navController)
+        }
+        composable(route = Screen.PlannerScreen.route){
+            PlannerScreen(navController = navController)
         }
     }
 }
