@@ -26,7 +26,7 @@ class UserRepo(private val userDao: UserDao, private val teamDao:TeamDao, privat
         taskDao.AddTask(task)
 
     }
-
+    
     suspend fun getUsersWithTeams(): List<UserWithTeams> {
         return teamDao.getUsersWithTeams()
     }

@@ -5,6 +5,7 @@ import android.provider.CalendarContract.Instances
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.rostorga.calendariumv2.data.database.dao.TaskDao
 import com.rostorga.calendariumv2.data.database.dao.TeamDao
 import com.rostorga.calendariumv2.data.database.dao.UserDao
 import com.rostorga.calendariumv2.data.database.entities.TaskData
@@ -12,12 +13,14 @@ import com.rostorga.calendariumv2.data.database.entities.TeamData
 import com.rostorga.calendariumv2.data.database.entities.UserData
 
 
-@Database(entities=[TeamData::class, UserData::class], version=1)
+@Database(entities=[TeamData::class, UserData::class, TaskData::class], version=2)
 abstract class AppDataBase : RoomDatabase() {
 
     abstract fun teamDao(): TeamDao
 
     abstract fun UserDao(): UserDao
+
+    abstract fun TaskDao(): TaskDao
 
 
 
