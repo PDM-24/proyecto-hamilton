@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.rostorga.calendariumv2.data.database.AppDataBase
+import com.rostorga.calendariumv2.data.database.entities.TaskData
 import com.rostorga.calendariumv2.data.database.entities.TeamData
 import com.rostorga.calendariumv2.data.database.entities.UserData
 import com.rostorga.calendariumv2.data.database.entities.UserWithTeams
@@ -25,11 +26,11 @@ class UserViewModel(application: Application): AndroidViewModel( application){
     init {
         val userDao = AppDataBase.getDataBaseInstance(application).UserDao()
         val teamDao = AppDataBase.getDataBaseInstance(application).teamDao()
-        repository = UserRepo(userDao, teamDao)
+        val taskDao = AppDataBase.getDataBaseInstance(application).TaskDao()
+        repository=UserRepo(userDao, teamDao, taskDao)
         getAllData = repository.getAllData
     }
 
-    //to run in background
     fun addUser(user: UserData){
         viewModelScope.launch(Dispatchers.IO) {
             repository.addUser(user)
@@ -39,6 +40,12 @@ class UserViewModel(application: Application): AndroidViewModel( application){
     fun addTeam(team: TeamData) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.addTeam(team)
+        }
+    }
+
+    fun addTask(task: TaskData){
+        viewModelScope.launch(Dispatchers.IO){
+            repository.addTasks(task)
         }
     }
 
@@ -67,5 +74,4 @@ class UserViewModel(application: Application): AndroidViewModel( application){
             }
         }
     }
-
 }

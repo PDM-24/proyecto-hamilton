@@ -16,7 +16,7 @@ interface TaskDao{
     suspend fun AddTask(task : TaskData)
 
     @Query("SELECT * FROM Tasks")
-    fun getAllTasks(): LiveData<List<UserData>>
+    fun getAllTasks(): LiveData<List<TaskData>>
 
 
 

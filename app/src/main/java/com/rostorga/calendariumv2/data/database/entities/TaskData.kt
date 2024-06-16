@@ -26,7 +26,7 @@ data class TaskData(
     val TimeStart :String,
 
     @ColumnInfo(name="TimeFinish")
-    val TimeFinishi: String,
+    val TimeFinish: String,
 
     //this is the FK
     @ColumnInfo(name="PersonId")
