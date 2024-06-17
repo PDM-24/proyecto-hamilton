@@ -1,5 +1,6 @@
 package com.rostorga.calendariumv2.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,8 +9,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -27,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,11 +43,13 @@ fun CreateTeam(
 ){
 
 
-
     var teamCreate by remember { mutableStateOf(" ") }
+    val context = LocalContext.current
+
 
 
     Dialog(onDismissRequest = { onDismiss() }){
+
 
         Box(
             modifier = Modifier
@@ -53,18 +59,13 @@ fun CreateTeam(
                 .background(Color(0xFFFFC64B)),
             contentAlignment = Alignment.Center
         ) {
+
+
             Row(
                 modifier = Modifier.fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(45.dp)
-                        .clip(CircleShape)
-                        .background(color = Color.White)
-                )
-
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -72,7 +73,26 @@ fun CreateTeam(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text(text = "Lets give it a name!", color = Color.White, fontSize = 20.sp)
+
+                    Row(modifier=Modifier.fillMaxWidth().padding(4.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically){
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(color = Color.White)
+
+                        )
+                        Text(text = "Lets give it a name!", color = Color.White, fontSize = 20.sp)
+
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(color = Color.White)
+
+                        )
+
+                    }
 
                     Spacer(modifier = Modifier.height(20.dp))
 
@@ -80,7 +100,7 @@ fun CreateTeam(
                         value = teamCreate,
                         onValueChange = { teamCreate = it },
                         shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.height(50.dp),
+                        modifier = Modifier.height(40.dp),
                         placeholder = {
                             Text(text=" Ex: 123456 ", color= Color.LightGray)
                         }
@@ -90,14 +110,18 @@ fun CreateTeam(
                     Spacer(modifier = Modifier.height(20.dp))
 
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            Toast.makeText(context, "You joined the team! Welcome!", Toast.LENGTH_SHORT).show()
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                     ) {
                         Text(text = "Create!", color = Color.Black)
                     }
+
                 }
 
             }
+
         }
 
     }
@@ -106,4 +130,10 @@ fun CreateTeam(
 
 
 
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewCreateTeam() {
+    CreateTeam(onDismiss = {})
 }

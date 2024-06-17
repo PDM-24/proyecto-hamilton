@@ -19,6 +19,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
@@ -31,20 +32,25 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.navigation.NavController
+import androidx.compose.ui.window.Dialog
 import com.rostorga.calendariumv2.R
+import com.maxkeppeler.sheets.calendar.CalendarView
+import com.maxkeppeler.sheets.calendar.models.CalendarConfig
+import com.maxkeppeler.sheets.calendar.models.CalendarSelection
+import com.maxkeppeler.sheets.calendar.models.CalendarStyle
 import java.time.LocalDate
 import com.rostorga.calendariumv2.screens.profileScreen
 import com.rostorga.calendariumv2.screens.CreateOrJoinTeam
+import com.rostorga.calendariumv2.screens.CreateTeam
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Preview
 @Composable
-fun ViewContainer(navController: NavController) {
+fun ViewContainer() {
     Scaffold(
         topBar = { ToolBar() },
         content = { HomeScreenContent() },
@@ -72,8 +78,9 @@ fun ToolBar() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(painter = painterResource(id = R.drawable.menuicon), contentDescription = null, modifier = Modifier.size(36.dp))
-            Image(painter = painterResource(id = R.drawable.user), contentDescription = null, modifier = Modifier.size(36.dp).clickable{showProfile=true})
+            Image(painter = painterResource(id = R.drawable.menuicon), contentDescription = null, modifier = Modifier.size(50.dp))
+            Image(painter = painterResource(id = R.drawable.user), contentDescription = null, modifier = Modifier.size(36.dp)
+                .clickable { showProfile = true })
         }
     })
 }
@@ -99,49 +106,59 @@ fun FAB() {
 
     FloatingActionButton(
         onClick = { showDialog = true },
+        containerColor = Color(0xFF6784FE),
+        contentColor = Color(0xFFFFFFFF),
         shape = CircleShape
     ) {
-        Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
+        Icon(imageVector = Icons.Filled.Add, contentDescription = "Add", modifier=Modifier.size(40.dp))
     }
 }
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTaskPopUp(
     onDismiss: () -> Unit,
     onNext: () -> Unit
-
 ) {
     var task by remember { mutableStateOf("") }
-    var time by remember { mutableStateOf("12:00") }
-    val timeState1  = rememberTimePickerState(9, 15, false)
-    val timeState2  = rememberTimePickerState(9, 15, false)
+    val timeState1 = rememberTimePickerState(9, 15, false)
+    val timeState2 = rememberTimePickerState(9, 15, false)
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            //this button should open up another display that shows a calendar
-            Button(onClick = onNext) {
-                Text("NEXT")
-            }
-        },
-        modifier = Modifier.height(500.dp),
-        title = {
-            Text("Add New Task")
-        },
-        text = {
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color(0xFFFB8478))
+                .padding(8.dp)
+                .width(300.dp)
+                .height(500.dp)
+        ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                TimeInput(state = timeState1)
-                TimeInput(state = timeState2)
+                Text(
+                    text = "Add New Task",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = Color.White,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                Text(
+                    text="From:"
+                )
+                TimeInput(state = timeState1, modifier=Modifier.height(80.dp))
+                Text(
+                    text="To:"
+                )
+                TimeInput(state = timeState2, modifier=Modifier.height(80.dp))
 
-                Spacer(modifier=Modifier.padding(16.dp))
+                Spacer(modifier = Modifier.padding(16.dp))
                 OutlinedTextField(
                     value = task,
                     onValueChange = { task = it },
-                    shape= RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(12.dp),
                     placeholder = { Text(text = "Add a description :) ") },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -149,9 +166,21 @@ fun AddTaskPopUp(
                         .height(100.dp)
                 )
 
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = onNext,
+                    modifier = Modifier
+                        .height(40.dp)
+                        .width(200.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFF0F0))
+                ) {
+                    Text("NEXT", color=Color.Black)
+                }
+
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -171,7 +200,6 @@ fun CalendarDialogPopUp(
             )
         }
     )
-
 
 }
 
@@ -201,17 +229,25 @@ fun HomeScreenContent() {
     ) {
 
 // this one should be on the right and should be thinner xd but i dont care right now
-        Row(modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically){
-            Box(
-                Modifier
-                    .size(150.dp, 30.dp)
-                    .background(Color(0xFFBA74A8), shape = RoundedCornerShape(15.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(textAlign = TextAlign.Center, text = "New rounded box")
+
+
+        Column(modifier=Modifier.padding(12.dp), horizontalAlignment = Alignment.End) {
+            Row(modifier = Modifier
+                .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End){
+                Box(
+                    Modifier
+                        .size(180.dp, 8.dp)
+                        .background(Color(0xFFBA74A8), shape = RoundedCornerShape(15.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                }
             }
+            Text(text="not a lot going on today!")
+
+
         }
+
 
         Spacer(modifier=Modifier.padding(4.dp))
 
@@ -224,7 +260,9 @@ fun HomeScreenContent() {
 //this box has to be clickable
             Box(
                 Modifier
-                    .size(150.dp, 30.dp).clickable{showCreateTeam=true}
+                    .size(180.dp, 60.dp)
+                    .padding(8.dp)
+                    .clickable { showCreateTeam = true }
                     .drawBehind {
                         drawRoundRect(
                             color = Color(0xFFBA74A8),
@@ -280,3 +318,10 @@ fun HomeScreenContent() {
         Spacer(modifier = Modifier.padding(8.dp))
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun AddTaskPopUpPreview() {
+    AddTaskPopUp(onDismiss = {}, onNext={})
+}
+
