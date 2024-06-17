@@ -1,4 +1,5 @@
 import android.annotation.SuppressLint
+import android.app.Application
 import android.os.Build
 import android.widget.CalendarView
 import android.widget.Toast
@@ -10,6 +11,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -17,6 +19,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,6 +48,12 @@ import java.time.LocalDate
 import com.rostorga.calendariumv2.screens.profileScreen
 import com.rostorga.calendariumv2.screens.CreateOrJoinTeam
 import com.rostorga.calendariumv2.screens.CreateTeam
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.rostorga.calendariumv2.viewModel.UserViewModel
+import com.rostorga.calendariumv2.data.database.entities.TaskData
+import kotlinx.coroutines.launch
+import java.time.format.DateTimeFormatter
+import androidx.compose.runtime.rememberCoroutineScope
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -85,11 +94,11 @@ fun ToolBar() {
     })
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun FAB() {
+fun FAB(userViewModel: UserViewModel = viewModel()) {
     var showDialog by remember { mutableStateOf(false) }
     var showCalendar by remember { mutableStateOf(false) }
-
 
     if (showDialog) {
         AddTaskPopUp(
@@ -97,7 +106,8 @@ fun FAB() {
             onNext = {
                 showDialog = false
                 showCalendar = true
-            }
+            },
+            userViewModel = userViewModel
         )
     }
     if (showCalendar) {
@@ -110,21 +120,28 @@ fun FAB() {
         contentColor = Color(0xFFFFFFFF),
         shape = CircleShape
     ) {
-        Icon(imageVector = Icons.Filled.Add, contentDescription = "Add", modifier=Modifier.size(40.dp))
+        Icon(imageVector = Icons.Filled.Add, contentDescription = "Add", modifier = Modifier.size(40.dp))
     }
 }
 
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTaskPopUp(
     onDismiss: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    userViewModel: UserViewModel
 ) {
     var task by remember { mutableStateOf("") }
+    var taskDesc by remember { mutableStateOf("") }
     val timeState1 = rememberTimePickerState(9, 15, false)
     val timeState2 = rememberTimePickerState(9, 15, false)
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val dateFormatter = DateTimeFormatter.ofPattern("dd - MM - yyyy")
 
     Dialog(onDismissRequest = onDismiss) {
         Box(
@@ -145,21 +162,27 @@ fun AddTaskPopUp(
                     color = Color.White,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-                Text(
-                    text="From:"
-                )
-                TimeInput(state = timeState1, modifier=Modifier.height(80.dp))
-                Text(
-                    text="To:"
-                )
-                TimeInput(state = timeState2, modifier=Modifier.height(80.dp))
+                Text("From:")
+                TimeInput(state = timeState1, modifier = Modifier.height(80.dp))
+                Text("To:")
+                TimeInput(state = timeState2, modifier = Modifier.height(80.dp))
 
                 Spacer(modifier = Modifier.padding(16.dp))
                 OutlinedTextField(
                     value = task,
                     onValueChange = { task = it },
                     shape = RoundedCornerShape(12.dp),
-                    placeholder = { Text(text = "Add a description :) ") },
+                    placeholder = { Text(text = "Add a title") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .height(56.dp)
+                )
+                OutlinedTextField(
+                    value = taskDesc,
+                    onValueChange = { taskDesc = it },
+                    shape = RoundedCornerShape(12.dp),
+                    placeholder = { Text(text = "Add a description") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
@@ -169,15 +192,30 @@ fun AddTaskPopUp(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = onNext,
+                    onClick = {
+                        val taskData = TaskData(
+                            TaskName = task,
+                            TaskDesc = taskDesc,
+                            Date = selectedDate.format(dateFormatter),
+                            TimeStart = "${timeState1.hour}:${timeState1.minute}",
+                            TimeFinish = "${timeState2.hour}:${timeState2.minute}",
+                            PersonId = 1 // Replace with actual user ID
+                        )
+
+                        scope.launch {
+                            userViewModel.addTask(taskData)
+                            Toast.makeText(context, "Task added!", Toast.LENGTH_SHORT).show()
+                        }
+
+                        onDismiss()
+                    },
                     modifier = Modifier
                         .height(40.dp)
                         .width(200.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFF0F0))
                 ) {
-                    Text("NEXT", color=Color.Black)
+                    Text("ADD TASK", color = Color.Black)
                 }
-
             }
         }
     }
@@ -203,11 +241,11 @@ fun CalendarDialogPopUp(
 
 }
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenContent() {
+fun HomeScreenContent(userViewModel: UserViewModel = viewModel()) {
+    val tasks by userViewModel.allTasks.observeAsState(initial = emptyList())
     var date by remember { mutableStateOf(" ") }
 
     var showCreateTeam by remember { mutableStateOf(false) }
@@ -215,7 +253,6 @@ fun HomeScreenContent() {
     if (showCreateTeam) {
         CreateOrJoinTeam(onDismiss = { showCreateTeam = false })
     }
-
 
     val stroke = Stroke(
         width = 2f,
@@ -228,36 +265,29 @@ fun HomeScreenContent() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-// this one should be on the right and should be thinner xd but i dont care right now
-
-
-        Column(modifier=Modifier.padding(12.dp), horizontalAlignment = Alignment.End) {
-            Row(modifier = Modifier
-                .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End){
+        Column(modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.End) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
+            ) {
                 Box(
                     Modifier
                         .size(180.dp, 8.dp)
                         .background(Color(0xFFBA74A8), shape = RoundedCornerShape(15.dp)),
                     contentAlignment = Alignment.Center
-                ) {
-                }
+                ) {}
             }
-            Text(text="not a lot going on today!")
-
-
+            Text(text = "Not a lot going on today!")
         }
 
-
-        Spacer(modifier=Modifier.padding(4.dp))
-
+        Spacer(modifier = Modifier.padding(4.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-//this box has to be clickable
             Box(
                 Modifier
                     .size(180.dp, 60.dp)
@@ -274,10 +304,7 @@ fun HomeScreenContent() {
             ) {
                 Text(textAlign = TextAlign.Center, text = "Create or join a team!")
             }
-
         }
-
-
 
         Box(
             modifier = Modifier
@@ -300,28 +327,40 @@ fun HomeScreenContent() {
         )
         Spacer(modifier = Modifier.padding(8.dp))
 
-        Box(
-            Modifier
-                .size(350.dp, 60.dp)
-                .drawBehind {
-                    drawRoundRect(
-                        color = Color.Red,
-                        style = stroke,
-                        cornerRadius = CornerRadius(8.dp.toPx())
-                    )
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Text(textAlign = TextAlign.Center, text = "Add a new task")
+        LazyColumn {
+            items(tasks) { task ->
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .drawBehind {
+                            drawRoundRect(
+                                color = Color.Red,
+                                style = stroke,
+                                cornerRadius = CornerRadius(8.dp.toPx())
+                            )
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column {
+                        Text(text = "Task: ${task.TaskName}")
+                        Text(text = "Description: ${task.TaskDesc}")
+                        Text(text = "From: ${task.TimeStart} To: ${task.TimeFinish}")
+                        Text(text = "Date: ${task.Date}")
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.padding(8.dp))
     }
 }
 
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun AddTaskPopUpPreview() {
-    AddTaskPopUp(onDismiss = {}, onNext={})
+    AddTaskPopUp(onDismiss = {}, onNext={}, userViewModel = UserViewModel(application = Application()))
 }
 
