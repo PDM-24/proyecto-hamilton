@@ -97,6 +97,10 @@ fun CreateOrJoinTeam(
 }
 
 
+
+
+
+
 //this is the code to just preview without deleting dialog so that
 //I can edit it later
 
@@ -131,7 +135,7 @@ fun CreateOrJoinTeam(
                         .fillMaxHeight()
                         .padding(16.dp),
                     verticalArrangement = Arrangement.SpaceBetween,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignm ent = Alignment.CenterHorizontally
                 ) {
                     Text(text = "Want to join a team?", color = Color.White, fontSize = 20.sp)
                     Button(
