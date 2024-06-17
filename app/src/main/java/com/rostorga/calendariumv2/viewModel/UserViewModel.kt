@@ -16,22 +16,25 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class UserViewModel(application: Application): AndroidViewModel( application){
+class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     val getAllData: LiveData<List<UserData>>
     private val repository: UserRepo
     private val _usersWithTeams = MutableLiveData<List<UserWithTeams>>()
+    val allTasks: LiveData<List<TaskData>>
+
     val usersWithTeams: LiveData<List<UserWithTeams>> get() = _usersWithTeams
 
     init {
         val userDao = AppDataBase.getDataBaseInstance(application).UserDao()
         val teamDao = AppDataBase.getDataBaseInstance(application).teamDao()
         val taskDao = AppDataBase.getDataBaseInstance(application).TaskDao()
-        repository=UserRepo(userDao, teamDao, taskDao)
+        repository = UserRepo(userDao, teamDao, taskDao)
         getAllData = repository.getAllData
+        allTasks = repository.allTasks // Initialize allTasks here
     }
 
-    fun addUser(user: UserData){
+    fun addUser(user: UserData) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.addUser(user)
         }
@@ -43,8 +46,8 @@ class UserViewModel(application: Application): AndroidViewModel( application){
         }
     }
 
-    fun addTask(task: TaskData){
-        viewModelScope.launch(Dispatchers.IO){
+    fun addTask(task: TaskData) {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.addTasks(task)
         }
     }
