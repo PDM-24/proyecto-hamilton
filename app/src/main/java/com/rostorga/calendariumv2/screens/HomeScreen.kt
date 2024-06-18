@@ -78,7 +78,6 @@ fun ToolBar() {
         profileScreen(onDismiss = { showProfile = false })
     }
 
-
     TopAppBar(title = {
         Row(
             modifier = Modifier
@@ -99,23 +98,30 @@ fun ToolBar() {
 fun FAB(userViewModel: UserViewModel = viewModel()) {
     var showDialog by remember { mutableStateOf(false) }
     var showCalendar by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf("") }
+
+    if (showCalendar) {
+        CalendarDialogPopUp(
+            onDismiss = { showCalendar = false },
+            onDateSelected = { date ->
+                selectedDate = date
+                showCalendar = false
+                showDialog = true
+            }
+        )
+    }
 
     if (showDialog) {
         AddTaskPopUp(
             onDismiss = { showDialog = false },
-            onNext = {
-                showDialog = false
-                showCalendar = true
-            },
-            userViewModel = userViewModel
+            onNext = { showDialog = false },
+            userViewModel = userViewModel,
+            selectedDate = selectedDate
         )
-    }
-    if (showCalendar) {
-        CalendarDialogPopUp(onDismiss = { showCalendar = false })
     }
 
     FloatingActionButton(
-        onClick = { showDialog = true },
+        onClick = { showCalendar = true },
         containerColor = Color(0xFF6784FE),
         contentColor = Color(0xFFFFFFFF),
         shape = CircleShape
@@ -124,24 +130,21 @@ fun FAB(userViewModel: UserViewModel = viewModel()) {
     }
 }
 
-
-
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTaskPopUp(
     onDismiss: () -> Unit,
     onNext: () -> Unit,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    selectedDate: String
 ) {
     var task by remember { mutableStateOf("") }
     var taskDesc by remember { mutableStateOf("") }
     val timeState1 = rememberTimePickerState(9, 15, false)
     val timeState2 = rememberTimePickerState(9, 15, false)
-    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val dateFormatter = DateTimeFormatter.ofPattern("dd - MM - yyyy")
 
     Dialog(onDismissRequest = onDismiss) {
         Box(
@@ -191,12 +194,14 @@ fun AddTaskPopUp(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                Text(text = "Selected Date: $selectedDate")
+
                 Button(
                     onClick = {
                         val taskData = TaskData(
                             TaskName = task,
                             TaskDesc = taskDesc,
-                            Date = selectedDate.format(dateFormatter),
+                            Date = selectedDate,
                             TimeStart = "${timeState1.hour}:${timeState1.minute}",
                             TimeFinish = "${timeState2.hour}:${timeState2.minute}",
                             PersonId = 1 // Replace with actual user ID
@@ -223,22 +228,29 @@ fun AddTaskPopUp(
 
 @Composable
 fun CalendarDialogPopUp(
-    onDismiss:()-> Unit
-){
-    var date by remember { mutableStateOf(" ")}
-    AlertDialog(onDismissRequest = onDismiss , confirmButton = {
-        //center the button but yeah mostly works now :D
-            Button(onClick=onDismiss ){
-                Text(text="OK")
-    }
+    onDismiss: () -> Unit,
+    onDateSelected: (String) -> Unit
+) {
+    var date by remember { mutableStateOf("") }
 
-    },
-        text={
-            AndroidView(factory = { CalendarView(it)}, update = { it.setOnDateChangeListener{ _, year, month, day -> date = "$day - ${month + 1} - $year" }}
-            )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Button(onClick = {
+                onDateSelected(date)
+                onDismiss()
+            }) {
+                Text(text = "OK")
+            }
+        },
+        text = {
+            AndroidView(factory = { CalendarView(it) }, update = {
+                it.setOnDateChangeListener { _, year, month, day ->
+                    date = "$day - ${month + 1} - $year"
+                }
+            })
         }
     )
-
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -246,7 +258,7 @@ fun CalendarDialogPopUp(
 @Composable
 fun HomeScreenContent(userViewModel: UserViewModel = viewModel()) {
     val tasks by userViewModel.allTasks.observeAsState(initial = emptyList())
-    var date by remember { mutableStateOf(" ") }
+    var date by remember { mutableStateOf("") }
 
     var showCreateTeam by remember { mutableStateOf(false) }
 
@@ -356,11 +368,9 @@ fun HomeScreenContent(userViewModel: UserViewModel = viewModel()) {
     }
 }
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun AddTaskPopUpPreview() {
-    AddTaskPopUp(onDismiss = {}, onNext={}, userViewModel = UserViewModel(application = Application()))
+    AddTaskPopUp(onDismiss = {}, onNext = {}, userViewModel = UserViewModel(application = Application()), selectedDate = "01 - 01 - 2023")
 }
-
