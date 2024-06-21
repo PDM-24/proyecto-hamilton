@@ -10,7 +10,7 @@ class MainViewModel : ViewModel(){
     var isDialogShown by mutableStateOf(false)
         private set
 
-    fun onBuyClikc(){
+    fun onBuyClick(){
         isDialogShown=true
     }
     fun onDismissDialog(){
