@@ -27,7 +27,4 @@ data class UserData(
 
     @ColumnInfo(name="IsLeader")
     val isLeader: Boolean,
-
-
-
 )

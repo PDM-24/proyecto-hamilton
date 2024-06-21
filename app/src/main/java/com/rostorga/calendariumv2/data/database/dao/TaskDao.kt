@@ -17,8 +17,4 @@ interface TaskDao{
 
     @Query("SELECT * FROM Tasks")
     fun getAllTasks(): LiveData<List<UserData>>
-
-
-
-
 }

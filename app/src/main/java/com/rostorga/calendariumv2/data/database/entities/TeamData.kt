@@ -28,8 +28,4 @@ data class TeamData(
     //this is the FK
     @ColumnInfo(name="PersonId")
     val PersonId: Int
-
-
-
-
 )

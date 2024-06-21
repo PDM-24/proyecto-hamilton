@@ -32,8 +32,4 @@ data class TaskData(
     @ColumnInfo(name="PersonId")
     val PersonId: Int,
 
-
-
-
-
     )
