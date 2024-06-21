@@ -70,8 +70,8 @@ fun CreateTeam(
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
-                .width(700.dp)
-                .height(200.dp)
+                .width(300.dp)
+                .height(350.dp)
                 .background(Color(0xFFFFC64B)),
             contentAlignment = Alignment.Center
         ) {
@@ -118,9 +118,9 @@ fun CreateTeam(
                         value = teamName,
                         onValueChange = { teamName = it },
                         shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.height(40.dp),
+                        modifier = Modifier.height(64.dp),
                         placeholder = {
-                            Text(text=" Ex: 123456 ", color= Color.LightGray)
+                            Text(text=" Ex: 123456 ", color= Color.White)
                         }
                     )
 
@@ -131,9 +131,9 @@ fun CreateTeam(
                         value = teamCode,
                         onValueChange = { teamCode = it },
                         shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.height(40.dp),
+                        modifier = Modifier.height(64.dp),
                         placeholder = {
-                            Text(text=" Ex: 123456 ", color= Color.LightGray)
+                            Text(text=" Ex: 123456 ", color= Color.White)
                         }
                     )
 
@@ -158,7 +158,7 @@ fun CreateTeam(
                                 }
                             }
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.width(200.dp)
 
                     ) {
                         Text("Create Team")

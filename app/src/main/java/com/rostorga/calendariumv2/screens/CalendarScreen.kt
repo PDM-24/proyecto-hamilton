@@ -31,12 +31,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.rostorga.calendariumv2.data.database.entities.TaskData
+import com.rostorga.calendariumv2.viewModel.UserViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,7 +74,7 @@ fun CalendarScreenContainer(navController: NavHostController) {
 @Composable
 fun CalendarFAB() {
     FloatingActionButton(
-        onClick = { /* Define your action here */ },
+        onClick = {  },
         containerColor = Color(0xFF6784FE),
         contentColor = Color(0xFFFFFFFF),
         shape = CircleShape
@@ -80,10 +85,15 @@ fun CalendarFAB() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CalendarScreen(navController: NavController) {
+fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = viewModel()) {
+
+    val tasks by userViewModel.allTasks.observeAsState(initial = emptyList())
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(12.dp)
             .background(color = Color.White)
             .verticalScroll(rememberScrollState())
     ) {
@@ -97,26 +107,52 @@ fun CalendarScreen(navController: NavController) {
                 columns = GridCells.Fixed(5),
                 modifier = Modifier.width(1000.dp)
             ) {
-                items(720) {
-                    Cards(it)
+                items(720) { index ->
+                    val task =
+                        tasks.getOrNull(index)  // Assuming index corresponds to task position
+                    if (task != null) {
+                        TaskCard(task)
+                    } else {
+                        EmptyCard(index)
+                    }
+                }
+            }
+
+            // You can add more content here if needed
+        }
+    }
+
+
+}
+
+    @Composable
+    fun TaskCard(task: TaskData) {
+        Card(
+            modifier = Modifier
+                .size(50.dp)
+                .padding(2.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F0))
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Column {
+                    Text(text = task.TaskName)
+                    Text(text = task.TimeStart)
                 }
             }
         }
-
-        // You can add more content here if needed
     }
-}
 
-@Composable
-fun Cards(it: Int) {
-    Card(
-        modifier = Modifier
-            .size(50.dp)
-            .padding(2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F0))
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(text = it.toString())
+
+    @Composable
+    fun EmptyCard(index: Int) {
+        Card(
+            modifier = Modifier
+                .size(50.dp)
+                .padding(2.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F0))
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Text(text = index.toString())
+            }
         }
     }
-}
