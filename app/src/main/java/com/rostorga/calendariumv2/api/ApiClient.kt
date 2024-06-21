@@ -1,6 +1,5 @@
 package com.rostorga.calendariumv2.api
 
-import com.rostorga.taller2moviles.util.Constants
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
