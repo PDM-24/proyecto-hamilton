@@ -1,29 +1,33 @@
 package com.rostorga.calendariumv2.api
 
 import com.rostorga.calendariumv2.api.Constants
+import com.rostorga.calendariumv2.api.apiObject.TaskApiObject
+import com.rostorga.calendariumv2.api.apiObject.UserApiObject
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface ApiService {
 
     //Post User
     @Headers(value = ["Content-Type: application/json"])
     @POST(value = Constants.API_PATH + Constants.USER_PATH + '/')
-    fun insertUser(@Body user: FamiliaApiObject): Call<ResponseBody>
+    fun insertUser(@Body user: UserApiObject): Call<ResponseBody>
 
     //Get User
     @Headers(value = ["Content-Type: application/json"])
-    @GET(value = Constants.API_PATH + Constants.USER_PATH + '/:id')
-    fun insertFamilia(@Body familia: FamiliaApiObject): Call<ResponseBody>
+    @GET(value = Constants.API_PATH + Constants.USER_PATH)
+    fun getUser(@Query("id") id: String): Call<ResponseBody>
 
     //Post Task
     @Headers(value = ["Content-Type: application/json"])
     @POST(value = Constants.API_PATH + Constants.TASK_PATH + '/')
-     fun insertPersona(@Body persona: PersonaApiObject): Call<ResponseBody>
+     fun insertTask(@Body task : TaskApiObject): Call<ResponseBody>
 
 
     //Get Tasks From User At day

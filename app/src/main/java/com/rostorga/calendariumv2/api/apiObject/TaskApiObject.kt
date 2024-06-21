@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
 
-data class taskApiObject(
+data class TaskApiObject(
     @SerializedName(value = "_id")
     @Expose
     val id: String? = null,
@@ -18,33 +18,33 @@ data class taskApiObject(
     
     @SerializedName(value = "Day")
     @Expose
-    val day: Int
+    val day: Int,
     
     @SerializedName(value = "Month")
     @Expose
-    val month: Int
+    val month: Int,
     
     @SerializedName(value = "Year")
     @Expose
-    val year: Int
+    val year: Int,
 
     @SerializedName(value = "Time")
     @Expose
-    val time: taskDurationObject
+    val time: TaskDurationObject,
 
     @SerializedName(value = "UserRef")
     @Expose
-    val userRef: String
+    val userRef: String,
 
     @SerializedName(value = "TeamRef")
     @Expose
     val team: String? = null
 )
 
-data class taskDurationObject(
+data class TaskDurationObject(
     @SerializedName(value = "Start")
     @Expose 
-    val start: Int
+    val start: Int,
 
     @SerializedName(value = "End")
     @Expose
