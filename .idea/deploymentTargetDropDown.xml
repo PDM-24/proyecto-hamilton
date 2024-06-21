@@ -2,6 +2,12 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
+      <entry key="CalendarScreen">
+        <State />
+      </entry>
+      <entry key="CalendarScreenContainer">
+        <State />
+      </entry>
       <entry key="ViewContainer">
         <State>
           <targetSelectedWithDropDown>
@@ -19,6 +25,9 @@
         </State>
       </entry>
       <entry key="app">
+        <State />
+      </entry>
+      <entry key="profileScreen">
         <State />
       </entry>
     </value>

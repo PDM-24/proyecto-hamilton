@@ -63,6 +63,10 @@ dependencies {
     ksp("androidx.room:room-compiler:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
 
+    implementation("androidx.navigation:navigation-common:2.7.7")
+
+
+
 
     implementation("androidx.navigation:navigation-compose:$nav_version")
     //ViewModel

@@ -47,7 +47,7 @@ import androidx.compose.ui.window.Dialog
             )*/
 
 @Composable
-fun profileScreen(     onDismiss:()-> Unit) {
+fun profileScreen(onDismiss:()-> Unit) {
     var username by remember { mutableStateOf(" ") }
     var email by remember { mutableStateOf(" ") }
     var teamName by remember { mutableStateOf(" ") }

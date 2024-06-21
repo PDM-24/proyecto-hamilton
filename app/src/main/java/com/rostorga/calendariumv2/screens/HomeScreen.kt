@@ -4,10 +4,8 @@ import android.os.Build
 import android.widget.CalendarView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,7 +14,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -40,30 +37,23 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import com.rostorga.calendariumv2.R
-import com.maxkeppeler.sheets.calendar.CalendarView
-import com.maxkeppeler.sheets.calendar.models.CalendarConfig
-import com.maxkeppeler.sheets.calendar.models.CalendarSelection
-import com.maxkeppeler.sheets.calendar.models.CalendarStyle
-import java.time.LocalDate
 import com.rostorga.calendariumv2.screens.profileScreen
 import com.rostorga.calendariumv2.screens.CreateOrJoinTeam
-import com.rostorga.calendariumv2.screens.CreateTeam
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rostorga.calendariumv2.viewModel.UserViewModel
 import com.rostorga.calendariumv2.data.database.entities.TaskData
 import kotlinx.coroutines.launch
-import java.time.format.DateTimeFormatter
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.navigation.NavController
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Preview
 @Composable
-fun ViewContainer() {
+fun ViewContainer(navController: NavController) {
     Scaffold(
         topBar = { ToolBar() },
-        content = { HomeScreenContent() },
-        floatingActionButton = { FAB() },
+        content = { HomeScreenContent(navController) },
+        floatingActionButton = { FAB(navController) },
         floatingActionButtonPosition = FabPosition.End
     )
 }
@@ -87,7 +77,8 @@ fun ToolBar() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(painter = painterResource(id = R.drawable.menuicon), contentDescription = null, modifier = Modifier.size(50.dp))
-            Image(painter = painterResource(id = R.drawable.user), contentDescription = null, modifier = Modifier.size(36.dp)
+            Image(painter = painterResource(id = R.drawable.user), contentDescription = null, modifier = Modifier
+                .size(36.dp)
                 .clickable { showProfile = true })
         }
     })
@@ -95,7 +86,7 @@ fun ToolBar() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun FAB(userViewModel: UserViewModel = viewModel()) {
+fun FAB(navController: NavController, userViewModel: UserViewModel = viewModel()) {
     var showDialog by remember { mutableStateOf(false) }
     var showCalendar by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf("") }
@@ -116,7 +107,8 @@ fun FAB(userViewModel: UserViewModel = viewModel()) {
             onDismiss = { showDialog = false },
             onNext = { showDialog = false },
             userViewModel = userViewModel,
-            selectedDate = selectedDate
+            selectedDate = selectedDate,
+            navController = navController
         )
     }
 
@@ -130,14 +122,14 @@ fun FAB(userViewModel: UserViewModel = viewModel()) {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTaskPopUp(
     onDismiss: () -> Unit,
     onNext: () -> Unit,
     userViewModel: UserViewModel,
-    selectedDate: String
+    selectedDate: String,
+    navController: NavController
 ) {
     var task by remember { mutableStateOf("") }
     var taskDesc by remember { mutableStateOf("") }
@@ -212,6 +204,8 @@ fun AddTaskPopUp(
                             Toast.makeText(context, "Task added!", Toast.LENGTH_SHORT).show()
                         }
 
+                        navController.navigate("calendar")
+
                         onDismiss()
                     },
                     modifier = Modifier
@@ -226,12 +220,18 @@ fun AddTaskPopUp(
     }
 }
 
+
+
+
+
 @Composable
 fun CalendarDialogPopUp(
     onDismiss: () -> Unit,
     onDateSelected: (String) -> Unit
 ) {
     var date by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -256,14 +256,14 @@ fun CalendarDialogPopUp(
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenContent(userViewModel: UserViewModel = viewModel()) {
+fun HomeScreenContent(navController: NavController, userViewModel: UserViewModel = viewModel()) {
     val tasks by userViewModel.allTasks.observeAsState(initial = emptyList())
     var date by remember { mutableStateOf("") }
 
     var showCreateTeam by remember { mutableStateOf(false) }
 
     if (showCreateTeam) {
-        CreateOrJoinTeam(onDismiss = { showCreateTeam = false })
+        CreateOrJoinTeam(onDismiss = { showCreateTeam = false }, userViewModel=userViewModel)
     }
 
     val stroke = Stroke(
@@ -372,5 +372,5 @@ fun HomeScreenContent(userViewModel: UserViewModel = viewModel()) {
 @Preview(showBackground = true)
 @Composable
 fun AddTaskPopUpPreview() {
-    AddTaskPopUp(onDismiss = {}, onNext = {}, userViewModel = UserViewModel(application = Application()), selectedDate = "01 - 01 - 2023")
+    AddTaskPopUp(onDismiss = {}, onNext = {}, userViewModel = UserViewModel(application = Application()), selectedDate = "01 - 01 - 2023", navController = NavController(LocalContext.current))
 }

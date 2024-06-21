@@ -1,5 +1,7 @@
 package com.rostorga.calendariumv2.screens
 
+import android.app.Application
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,32 +23,46 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.rostorga.calendariumv2.data.database.entities.TeamData
+import com.rostorga.calendariumv2.viewModel.UserViewModel
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun CreateTeam(
-    onDismiss:()->Unit
+    onDismiss:()->Unit,
+    userViewModel: UserViewModel
 ){
 
 
-    var teamCreate by remember { mutableStateOf(" ") }
-    val context = LocalContext.current
+    var teamName by remember { mutableStateOf(TextFieldValue("")) }
+    var teamCode by remember { mutableStateOf(TextFieldValue("")) }
 
 
+    val usersWithTeams by userViewModel.usersWithTeams.observeAsState(emptyList())
+    val users by userViewModel.getAllData.observeAsState(initial = emptyList())
+
+    val scope = rememberCoroutineScope()
 
     Dialog(onDismissRequest = { onDismiss() }){
 
@@ -54,7 +70,7 @@ fun CreateTeam(
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
-                .width(600.dp)
+                .width(700.dp)
                 .height(200.dp)
                 .background(Color(0xFFFFC64B)),
             contentAlignment = Alignment.Center
@@ -74,7 +90,9 @@ fun CreateTeam(
                     verticalArrangement = Arrangement.Center
                 ) {
 
-                    Row(modifier=Modifier.fillMaxWidth().padding(4.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically){
+                    Row(modifier= Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically){
                         Box(
                             modifier = Modifier
                                 .size(10.dp)
@@ -97,25 +115,54 @@ fun CreateTeam(
                     Spacer(modifier = Modifier.height(20.dp))
 
                     OutlinedTextField(
-                        value = teamCreate,
-                        onValueChange = { teamCreate = it },
+                        value = teamName,
+                        onValueChange = { teamName = it },
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.height(40.dp),
                         placeholder = {
                             Text(text=" Ex: 123456 ", color= Color.LightGray)
                         }
+                    )
 
+                    Spacer(modifier = Modifier.height(20.dp))
+
+
+                    OutlinedTextField(
+                        value = teamCode,
+                        onValueChange = { teamCode = it },
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.height(40.dp),
+                        placeholder = {
+                            Text(text=" Ex: 123456 ", color= Color.LightGray)
+                        }
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
 
                     Button(
                         onClick = {
-                            Toast.makeText(context, "You joined the team! Welcome!", Toast.LENGTH_SHORT).show()
+                            scope.launch {
+                                try {
+                                    if (users.isNotEmpty()) {
+                                        val user = users.first()
+                                        val team = TeamData(
+                                            teamName = teamName.text,
+                                            teamCode = teamCode.text,
+                                            PersonId = user.id
+                                        )
+                                        userViewModel.addTeam(team)
+                                        Log.d("UserScreen", "Team added: $team")
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("UserScreen", "Error adding team", e)
+                                }
+                            }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                        modifier = Modifier.fillMaxWidth()
+
                     ) {
-                        Text(text = "Create!", color = Color.Black)
+                        Text("Create Team")
+
                     }
 
                 }
@@ -135,5 +182,5 @@ fun CreateTeam(
 @Preview(showBackground = true)
 @Composable
 fun PreviewCreateTeam() {
-    CreateTeam(onDismiss = {})
+    CreateTeam(onDismiss = {}, userViewModel = UserViewModel(application = Application()))
 }

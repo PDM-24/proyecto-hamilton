@@ -21,13 +21,13 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.rostorga.calendariumv2.screens.JoinTeam
 import com.rostorga.calendariumv2.screens.CreateTeam
-
+import com.rostorga.calendariumv2.viewModel.UserViewModel
 
 
 @Composable
 fun CreateOrJoinTeam(
-
-    onDismiss:()->Unit
+    onDismiss:()->Unit,
+    userViewModel: UserViewModel
 
 ) {
 
@@ -41,7 +41,7 @@ fun CreateOrJoinTeam(
     var showCreateTeam by remember{ mutableStateOf(false)}
 
     if (showCreateTeam) {
-        CreateTeam(onDismiss={showCreateTeam=false})
+        CreateTeam(onDismiss = { showCreateTeam = false }, userViewModel = userViewModel)
 
     }
 
@@ -97,54 +97,3 @@ fun CreateOrJoinTeam(
 }
 
 
-
-
-
-
-//this is the code to just preview without deleting dialog so that
-//I can edit it later
-
-/*        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(20.dp))
-                .width(600.dp)
-                .height(300.dp)
-                .background(Color(0xFFFFC64B))
-                .padding(12.dp)
-        ) {
-            Row(modifier = Modifier.fillMaxSize()) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.SpaceBetween,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(text = "Want to create a team?", color = Color.White, fontSize = 20.sp)
-                    Button(
-                        onClick = {/*TODO*/ },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-                    ) {
-                        Text(text = "Create!", color = Color.Black)
-                    }
-                }
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.SpaceBetween,
-                    horizontalAlignm ent = Alignment.CenterHorizontally
-                ) {
-                    Text(text = "Want to join a team?", color = Color.White, fontSize = 20.sp)
-                    Button(
-                        onClick = {/*TODO*/ },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-                    ) {
-                        Text(text = "Join!", color = Color.Black)
-                    }
-                }
-            }
-
-        }*/
