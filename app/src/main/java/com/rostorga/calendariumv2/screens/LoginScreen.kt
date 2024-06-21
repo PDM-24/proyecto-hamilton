@@ -34,13 +34,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rostorga.calendariumv2.R
+import com.rostorga.calendariumv2.api.apiObject.UserApiObject
+import com.rostorga.calendariumv2.api.apiObject.UserNameApiObject
 import com.rostorga.calendariumv2.ui.theme.*
+import com.rostorga.calendariumv2.viewModel.ApiViewModel
 
 @Composable
 fun LoginScreen(navController: NavController) {
 
     var userName by remember { mutableStateOf(TextFieldValue(""))}
     var password by remember { mutableStateOf(TextFieldValue(""))}
+
+    val api = ApiViewModel()
 
     Column(
         modifier = Modifier
@@ -77,7 +82,12 @@ fun LoginScreen(navController: NavController) {
             }
         }
         Spacer(modifier = Modifier.height(40.dp))
-        Button(onClick = { navController.navigate(Screen.MainScreen.route)}) {
+        Button(onClick = {
+            api.getUser()
+            val poster = UserApiObject(UserNameApiObject("Android", "SIgma"),
+                "ANDROX", "937492374", true)
+            api.postUser(poster)
+        }) {
             Text(text = "CLICK ME")
         }
 

@@ -72,6 +72,7 @@ dependencies {
     //RetroFit
     implementation ("com.squareup.retrofit2:retrofit:$retrofit_version")
     implementation ("com.squareup.retrofit2:converter-gson:$retrofit_version")
+    implementation ("com.google.code.gson:gson:2.8.5")
 
     //okhttp3
     implementation("com.squareup.okhttp3:okhttp:4.12.0")

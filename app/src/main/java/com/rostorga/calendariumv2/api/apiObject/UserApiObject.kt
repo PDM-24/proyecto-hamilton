@@ -4,24 +4,28 @@ import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
 data class UserApiObject(
-    @SerializedName(value = "_id")
+    @SerializedName("Name")
     @Expose
-    val id: String? = null,
-    @SerializedName(value = "Name")
+    var Name: UserNameApiObject,
+    @SerializedName("UserName")
     @Expose
-    val name: UserNameApiObject,
-    @SerializedName(value = "UserName")
-    val userName: String,
-    @SerializedName(value = "Password")
+    val UserName: String,
+    @SerializedName("Password")
     @Expose
-    val password: String
+    val Password: String,
+    @SerializedName("IsLeader")
+    @Expose
+    val isLeader: Boolean,
+    @SerializedName("_id")
+    @Expose
+    val id: String? = null
 )
 
 data class UserNameApiObject(
-    @SerializedName(value = "first")
+    @SerializedName("first")
     @Expose
-    val frist: String,
-    @SerializedName(value = "last")
+    val First: String,
+    @SerializedName("last")
     @Expose
-    val last: String,
+    val Last: String,
 )

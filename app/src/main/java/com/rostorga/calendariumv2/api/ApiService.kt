@@ -10,6 +10,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
@@ -17,18 +18,17 @@ interface ApiService {
     //Post User
     @Headers(value = ["Content-Type: application/json"])
     @POST(value = Constants.API_PATH + Constants.USER_PATH + '/')
-    fun insertUser(@Body user: UserApiObject): Call<ResponseBody>
+    fun postUser(@Body user: UserApiObject): Call<ResponseBody>
 
     //Get User
     @Headers(value = ["Content-Type: application/json"])
-    @GET(value = Constants.API_PATH + Constants.USER_PATH)
-    fun getUser(@Query("id") id: String): Call<ResponseBody>
+    @GET(value = Constants.API_PATH + Constants.USER_PATH + "/{id}")
+    fun getUser(@Path("id") id: String): Call<ResponseBody>
 
     //Post Task
     @Headers(value = ["Content-Type: application/json"])
     @POST(value = Constants.API_PATH + Constants.TASK_PATH + '/')
-     fun insertTask(@Body task : TaskApiObject): Call<ResponseBody>
-
+     fun insertTask(@Body task: TaskApiObject): Call<ResponseBody>
 
     //Get Tasks From User At day
 
