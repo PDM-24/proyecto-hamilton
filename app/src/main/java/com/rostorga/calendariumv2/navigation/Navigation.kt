@@ -19,7 +19,7 @@ import com.rostorga.calendariumv2.screens.Screen
 @Composable
 fun Navigation(){
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.PlannerScreen.route){
+    NavHost(navController = navController, startDestination = Screen.LoginScreen.route){
         composable(route = Screen.MainScreen.route){
             ViewContainer(navController = navController)
         }
