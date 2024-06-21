@@ -1,24 +1,25 @@
 import android.annotation.SuppressLint
+import android.app.Application
 import android.os.Build
 import android.widget.CalendarView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
@@ -31,15 +32,19 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.navigation.NavController
+import androidx.compose.ui.window.Dialog
 import com.rostorga.calendariumv2.R
-import java.time.LocalDate
 import com.rostorga.calendariumv2.screens.profileScreen
 import com.rostorga.calendariumv2.screens.CreateOrJoinTeam
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.rostorga.calendariumv2.viewModel.UserViewModel
+import com.rostorga.calendariumv2.data.database.entities.TaskData
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.navigation.NavController
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -47,8 +52,8 @@ import com.rostorga.calendariumv2.screens.CreateOrJoinTeam
 fun ViewContainer(navController: NavController) {
     Scaffold(
         topBar = { ToolBar() },
-        content = { HomeScreenContent() },
-        floatingActionButton = { FAB() },
+        content = { HomeScreenContent(navController) },
+        floatingActionButton = { FAB(navController) },
         floatingActionButtonPosition = FabPosition.End
     )
 }
@@ -63,7 +68,6 @@ fun ToolBar() {
         profileScreen(onDismiss = { showProfile = false })
     }
 
-
     TopAppBar(title = {
         Row(
             modifier = Modifier
@@ -72,36 +76,49 @@ fun ToolBar() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(painter = painterResource(id = R.drawable.menuicon), contentDescription = null, modifier = Modifier.size(36.dp))
-            Image(painter = painterResource(id = R.drawable.user), contentDescription = null, modifier = Modifier.size(36.dp).clickable{showProfile=true})
+            Image(painter = painterResource(id = R.drawable.menuicon), contentDescription = null, modifier = Modifier.size(50.dp))
+            Image(painter = painterResource(id = R.drawable.user), contentDescription = null, modifier = Modifier
+                .size(36.dp)
+                .clickable { showProfile = true })
         }
     })
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun FAB() {
+fun FAB(navController: NavController, userViewModel: UserViewModel = viewModel()) {
     var showDialog by remember { mutableStateOf(false) }
     var showCalendar by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf("") }
 
+    if (showCalendar) {
+        CalendarDialogPopUp(
+            onDismiss = { showCalendar = false },
+            onDateSelected = { date ->
+                selectedDate = date
+                showCalendar = false
+                showDialog = true
+            }
+        )
+    }
 
     if (showDialog) {
         AddTaskPopUp(
             onDismiss = { showDialog = false },
-            onNext = {
-                showDialog = false
-                showCalendar = true
-            }
+            onNext = { showDialog = false },
+            userViewModel = userViewModel,
+            selectedDate = selectedDate,
+            navController = navController
         )
-    }
-    if (showCalendar) {
-        CalendarDialogPopUp(onDismiss = { showCalendar = false })
     }
 
     FloatingActionButton(
-        onClick = { showDialog = true },
+        onClick = { showCalendar = true },
+        containerColor = Color(0xFF6784FE),
+        contentColor = Color(0xFFFFFFFF),
         shape = CircleShape
     ) {
-        Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
+        Icon(imageVector = Icons.Filled.Add, contentDescription = "Add", modifier = Modifier.size(40.dp))
     }
 }
 
@@ -109,85 +126,145 @@ fun FAB() {
 @Composable
 fun AddTaskPopUp(
     onDismiss: () -> Unit,
-    onNext: () -> Unit
-
+    onNext: () -> Unit,
+    userViewModel: UserViewModel,
+    selectedDate: String,
+    navController: NavController
 ) {
     var task by remember { mutableStateOf("") }
-    var time by remember { mutableStateOf("12:00") }
-    val timeState1  = rememberTimePickerState(9, 15, false)
-    val timeState2  = rememberTimePickerState(9, 15, false)
+    var taskDesc by remember { mutableStateOf("") }
+    val timeState1 = rememberTimePickerState(9, 15, false)
+    val timeState2 = rememberTimePickerState(9, 15, false)
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            //this button should open up another display that shows a calendar
-            Button(onClick = onNext) {
-                Text("NEXT")
-            }
-        },
-        modifier = Modifier.height(500.dp),
-        title = {
-            Text("Add New Task")
-        },
-        text = {
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color(0xFFFB8478))
+                .padding(8.dp)
+                .width(300.dp)
+                .height(500.dp)
+        ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                TimeInput(state = timeState1)
-                TimeInput(state = timeState2)
+                Text(
+                    text = "Add New Task",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = Color.White,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                Text("From:")
+                TimeInput(state = timeState1, modifier = Modifier.height(80.dp))
+                Text("To:")
+                TimeInput(state = timeState2, modifier = Modifier.height(80.dp))
 
-                Spacer(modifier=Modifier.padding(16.dp))
+                Spacer(modifier = Modifier.padding(16.dp))
                 OutlinedTextField(
                     value = task,
                     onValueChange = { task = it },
-                    shape= RoundedCornerShape(12.dp),
-                    placeholder = { Text(text = "Add a description :) ") },
+                    shape = RoundedCornerShape(12.dp),
+                    placeholder = { Text(text = "Add a title") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .height(56.dp)
+                )
+                OutlinedTextField(
+                    value = taskDesc,
+                    onValueChange = { taskDesc = it },
+                    shape = RoundedCornerShape(12.dp),
+                    placeholder = { Text(text = "Add a description") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .height(100.dp)
                 )
 
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(text = "Selected Date: $selectedDate")
+
+                Button(
+                    onClick = {
+                        val taskData = TaskData(
+                            TaskName = task,
+                            TaskDesc = taskDesc,
+                            Date = selectedDate,
+                            TimeStart = "${timeState1.hour}:${timeState1.minute}",
+                            TimeFinish = "${timeState2.hour}:${timeState2.minute}",
+                            PersonId = 1 // Replace with actual user ID
+                        )
+
+                        scope.launch {
+                            userViewModel.addTask(taskData)
+                            Toast.makeText(context, "Task added!", Toast.LENGTH_SHORT).show()
+                        }
+
+                        navController.navigate("calendar")
+
+                        onDismiss()
+                    },
+                    modifier = Modifier
+                        .height(40.dp)
+                        .width(200.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFF0F0))
+                ) {
+                    Text("ADD TASK", color = Color.Black)
+                }
             }
         }
-    )
+    }
 }
+
+
+
+
 
 @Composable
 fun CalendarDialogPopUp(
-    onDismiss:()-> Unit
-){
-    var date by remember { mutableStateOf(" ")}
-    AlertDialog(onDismissRequest = onDismiss , confirmButton = {
-        //center the button but yeah mostly works now :D
-            Button(onClick=onDismiss ){
-                Text(text="OK")
-    }
+    onDismiss: () -> Unit,
+    onDateSelected: (String) -> Unit
+) {
+    var date by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
-    },
-        text={
-            AndroidView(factory = { CalendarView(it)}, update = { it.setOnDateChangeListener{ _, year, month, day -> date = "$day - ${month + 1} - $year" }}
-            )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Button(onClick = {
+                onDateSelected(date)
+                onDismiss()
+            }) {
+                Text(text = "OK")
+            }
+        },
+        text = {
+            AndroidView(factory = { CalendarView(it) }, update = {
+                it.setOnDateChangeListener { _, year, month, day ->
+                    date = "$day - ${month + 1} - $year"
+                }
+            })
         }
     )
-
-
 }
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenContent() {
-    var date by remember { mutableStateOf(" ") }
+fun HomeScreenContent(navController: NavController, userViewModel: UserViewModel = viewModel()) {
+    val tasks by userViewModel.allTasks.observeAsState(initial = emptyList())
+    var date by remember { mutableStateOf("") }
 
     var showCreateTeam by remember { mutableStateOf(false) }
 
     if (showCreateTeam) {
-        CreateOrJoinTeam(onDismiss = { showCreateTeam = false })
+        CreateOrJoinTeam(onDismiss = { showCreateTeam = false }, userViewModel=userViewModel)
     }
-
 
     val stroke = Stroke(
         width = 2f,
@@ -200,31 +277,34 @@ fun HomeScreenContent() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-// this one should be on the right and should be thinner xd but i dont care right now
-        Row(modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically){
-            Box(
-                Modifier
-                    .size(150.dp, 30.dp)
-                    .background(Color(0xFFBA74A8), shape = RoundedCornerShape(15.dp)),
-                contentAlignment = Alignment.Center
+        Column(modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.End) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
             ) {
-                Text(textAlign = TextAlign.Center, text = "New rounded box")
+                Box(
+                    Modifier
+                        .size(180.dp, 8.dp)
+                        .background(Color(0xFFBA74A8), shape = RoundedCornerShape(15.dp)),
+                    contentAlignment = Alignment.Center
+                ) {}
             }
+            Text(text = "Not a lot going on today!")
         }
 
-        Spacer(modifier=Modifier.padding(4.dp))
-
+        Spacer(modifier = Modifier.padding(4.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-//this box has to be clickable
             Box(
                 Modifier
-                    .size(150.dp, 30.dp).clickable{showCreateTeam=true}
+                    .size(180.dp, 60.dp)
+                    .padding(8.dp)
+                    .clickable { showCreateTeam = true }
                     .drawBehind {
                         drawRoundRect(
                             color = Color(0xFFBA74A8),
@@ -236,10 +316,7 @@ fun HomeScreenContent() {
             ) {
                 Text(textAlign = TextAlign.Center, text = "Create or join a team!")
             }
-
         }
-
-
 
         Box(
             modifier = Modifier
@@ -262,21 +339,38 @@ fun HomeScreenContent() {
         )
         Spacer(modifier = Modifier.padding(8.dp))
 
-        Box(
-            Modifier
-                .size(350.dp, 60.dp)
-                .drawBehind {
-                    drawRoundRect(
-                        color = Color.Red,
-                        style = stroke,
-                        cornerRadius = CornerRadius(8.dp.toPx())
-                    )
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Text(textAlign = TextAlign.Center, text = "Add a new task")
+        LazyColumn {
+            items(tasks) { task ->
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .drawBehind {
+                            drawRoundRect(
+                                color = Color.Red,
+                                style = stroke,
+                                cornerRadius = CornerRadius(8.dp.toPx())
+                            )
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column {
+                        Text(text = "Task: ${task.TaskName}")
+                        Text(text = "Description: ${task.TaskDesc}")
+                        Text(text = "From: ${task.TimeStart} To: ${task.TimeFinish}")
+                        Text(text = "Date: ${task.Date}")
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.padding(8.dp))
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview(showBackground = true)
+@Composable
+fun AddTaskPopUpPreview() {
+    AddTaskPopUp(onDismiss = {}, onNext = {}, userViewModel = UserViewModel(application = Application()), selectedDate = "01 - 01 - 2023", navController = NavController(LocalContext.current))
 }

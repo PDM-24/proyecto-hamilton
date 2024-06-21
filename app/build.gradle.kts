@@ -65,6 +65,10 @@ dependencies {
     ksp("androidx.room:room-compiler:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
 
+    implementation("androidx.navigation:navigation-common:2.7.7")
+
+
+
     //RetroFit
     implementation ("com.squareup.retrofit2:retrofit:$retrofit_version")
     implementation ("com.squareup.retrofit2:converter-gson:$retrofit_version")

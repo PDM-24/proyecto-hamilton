@@ -1,5 +1,3 @@
-// UserScreen.kt
-
 package com.rostorga.calendariumv2.ui
 
 import android.util.Log
@@ -15,169 +13,244 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.rostorga.calendariumv2.data.database.entities.TaskData
 import com.rostorga.calendariumv2.data.database.entities.TeamData
 import com.rostorga.calendariumv2.data.database.entities.UserData
 import com.rostorga.calendariumv2.viewModel.UserViewModel
+import kotlinx.coroutines.launch
+
+
+//this is a temp screen to make sure the data is sent and the localDB is setup
 
 @Composable
 fun UserScreen(userViewModel: UserViewModel = viewModel()) {
-    var name by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf(TextFieldValue("")) }
+    var lastName by remember { mutableStateOf(TextFieldValue("")) }
+    var username by remember { mutableStateOf(TextFieldValue("")) }
+    var password by remember { mutableStateOf(TextFieldValue("")) }
     var isLeader by remember { mutableStateOf(false) }
-    var teamName by remember { mutableStateOf("") }
-    var teamCode by remember { mutableStateOf("") }
-    var joinTeamCode by remember { mutableStateOf("") }
+    var teamName by remember { mutableStateOf(TextFieldValue("")) }
+    var teamCode by remember { mutableStateOf(TextFieldValue("")) }
+    var joinTeamCode by remember { mutableStateOf(TextFieldValue("")) }
     var showUsers by remember { mutableStateOf(false) }
-    val users by userViewModel.getAllData.observeAsState(initial = emptyList())
-    val usersWithTeams by userViewModel.usersWithTeams.observeAsState(initial = emptyList())
+    var taskName by remember { mutableStateOf(TextFieldValue("")) }
+    var taskDesc by remember { mutableStateOf(TextFieldValue("")) }
+    var taskDate by remember { mutableStateOf(TextFieldValue("")) }
+    var taskTimeStart by remember { mutableStateOf(TextFieldValue("")) }
+    var taskTimeFinish by remember { mutableStateOf(TextFieldValue("")) }
 
-    Column(
+    val usersWithTeams by userViewModel.usersWithTeams.observeAsState(emptyList())
+    val users by userViewModel.getAllData.observeAsState(initial = emptyList())
+
+    val scope = rememberCoroutineScope()
+
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        TextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Name") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        TextField(
-            value = lastName,
-            onValueChange = { lastName = it },
-            label = { Text("Last Name") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        TextField(
-            value = username,
-            onValueChange = { username = it },
-            label = { Text("Username") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        TextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation()
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = 8.dp)
-        ) {
-            Checkbox(
-                checked = isLeader,
-                onCheckedChange = { isLeader = it }
+        item {
+            TextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Name") },
+                modifier = Modifier.fillMaxWidth()
             )
-            Text(text = "Is Leader")
-        }
-        Button(
-            onClick = {
-                try {
-                    val user = UserData(
-                        name = name,
-                        lastName = lastName,
-                        Username = username,
-                        Password = password,
-                        isLeader = isLeader
-                    )
-                    userViewModel.addUser(user)
-                    Log.d("UserScreen", "User added: $user")
-                } catch (e: Exception) {
-                    Log.e("UserScreen", "Error adding user", e)
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Save")
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        TextField(
-            value = teamName,
-            onValueChange = { teamName = it },
-            label = { Text("Team Name") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        TextField(
-            value = teamCode,
-            onValueChange = { teamCode = it },
-            label = { Text("Team Code") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Button(
-            onClick = {
-                try {
-                    if (users.isNotEmpty()) {
-                        // Assuming the first user is creating the team, adjust as needed
-                        val user = users.first()
-                        val team = TeamData(
-                            teamName = teamName,
-                            teamCode = teamCode,
-                            PersonId = user.id
-                        )
-                        userViewModel.addTeam(team)
-                        Log.d("UserScreen", "Team added: $team")
-                    }
-                } catch (e: Exception) {
-                    Log.e("UserScreen", "Error adding team", e)
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Create Team")
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        TextField(
-            value = joinTeamCode,
-            onValueChange = { joinTeamCode = it },
-            label = { Text("Join Team Code") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Button(
-            onClick = {
-                try {
-                    if (users.isNotEmpty()) {
-                        // Assuming the first user is joining the team, adjust as needed
-                        val user = users.first()
-                        userViewModel.joinTeam(user.id, joinTeamCode)
-                        Log.d("UserScreen", "User joined team with code: $joinTeamCode")
-                    }
-                } catch (e: Exception) {
-                    Log.e("UserScreen", "Error joining team", e)
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Join Team")
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = {
-                showUsers = !showUsers
-                if (showUsers) {
-                    userViewModel.fetchUsersWithTeams()
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(if (showUsers) "Hide Users and Teams" else "Display Users and Teams")
-        }
-        if (showUsers) {
-            LazyColumn {
-                items(usersWithTeams) { userWithTeams ->
-                    Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                        Text(text = "User: ${userWithTeams.user.name} ${userWithTeams.user.lastName}")
-                        Text(text = "Username: ${userWithTeams.user.Username}")
-                        userWithTeams.teams.forEach { team ->
-                            Text(text = "In Team: ${team.teamName}")
+            TextField(
+                value = lastName,
+                onValueChange = { lastName = it },
+                label = { Text("Last Name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            TextField(
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("Username") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            TextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = isLeader,
+                    onCheckedChange = { isLeader = it }
+                )
+                Text(text = "Is Leader")
+            }
+            Button(
+                onClick = {
+                    scope.launch {
+                        try {
+                            val user = UserData(
+                                name = name.text,
+                                lastName = lastName.text,
+                                Username = username.text,
+                                Password = password.text,
+                                isLeader = isLeader
+                            )
+                            userViewModel.addUser(user)
+                            Log.d("UserScreen", "User added: $user")
+                        } catch (e: Exception) {
+                            Log.e("UserScreen", "Error adding user", e)
                         }
                     }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Add User")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            TextField(
+                value = teamName,
+                onValueChange = { teamName = it },
+                label = { Text("Team Name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            TextField(
+                value = teamCode,
+                onValueChange = { teamCode = it },
+                label = { Text("Team Code") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Button(
+                onClick = {
+                    scope.launch {
+                        try {
+                            if (users.isNotEmpty()) {
+                                val user = users.first()
+                                val team = TeamData(
+                                    teamName = teamName.text,
+                                    teamCode = teamCode.text,
+                                    PersonId = user.id
+                                )
+                                userViewModel.addTeam(team)
+                                Log.d("UserScreen", "Team added: $team")
+                            }
+                        } catch (e: Exception) {
+                            Log.e("UserScreen", "Error adding team", e)
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Create Team")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            TextField(
+                value = joinTeamCode,
+                onValueChange = { joinTeamCode = it },
+                label = { Text("Join Team Code") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Button(
+                onClick = {
+                    scope.launch {
+                        try {
+                            if (users.isNotEmpty()) {
+                                val user = users.first()
+                                userViewModel.joinTeam(user.id, joinTeamCode.text)
+                                Log.d("UserScreen", "User joined team with code: $joinTeamCode")
+                            }
+                        } catch (e: Exception) {
+                            Log.e("UserScreen", "Error joining team", e)
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Join Team")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = {
+                    showUsers = !showUsers
+                    if (showUsers) {
+                        userViewModel.fetchUsersWithTeams()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(if (showUsers) "Hide Users and Teams" else "Display Users and Teams")
+            }
+        }
+        if (showUsers) {
+            items(usersWithTeams) { userWithTeams ->
+                Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                    Text(text = "User: ${userWithTeams.user.name} ${userWithTeams.user.lastName}")
+                    Text(text = "Username: ${userWithTeams.user.Username}")
+                    userWithTeams.teams.forEach { team ->
+                        Text(text = "In Team: ${team.teamName}")
+                    }
                 }
+            }
+        }
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+            TextField(
+                value = taskName,
+                onValueChange = { taskName = it },
+                label = { Text("Task Name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            TextField(
+                value = taskDesc,
+                onValueChange = { taskDesc = it },
+                label = { Text("Task Description") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            TextField(
+                value = taskDate,
+                onValueChange = { taskDate = it },
+                label = { Text("Task Date") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            TextField(
+                value = taskTimeStart,
+                onValueChange = { taskTimeStart = it },
+                label = { Text("Task Start Time") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            TextField(
+                value = taskTimeFinish,
+                onValueChange = { taskTimeFinish = it },
+                label = { Text("Task Finish Time") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Button(
+                onClick = {
+                    scope.launch {
+                        try {
+                            if (users.isNotEmpty()) {
+                                val user = users.first()
+                                val task = TaskData(
+                                    TaskName = taskName.text,
+                                    TaskDesc = taskDesc.text,
+                                    Date = taskDate.text,
+                                    TimeStart = taskTimeStart.text,
+                                    TimeFinish = taskTimeFinish.text,
+                                    PersonId = user.id
+                                )
+                                userViewModel.addTask(task)
+                                Log.d("UserScreen", "Task added: $task")
+                            }
+                        } catch (e: Exception) {
+                            Log.e("UserScreen", "Error adding task", e)
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Add Task")
             }
         }
     }

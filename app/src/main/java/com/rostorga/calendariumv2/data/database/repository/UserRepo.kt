@@ -13,6 +13,8 @@ class UserRepo(private val userDao: UserDao, private val teamDao:TeamDao, privat
 
 
     val getAllData = userDao.getAllUsers()
+    val allTasks: LiveData<List<TaskData>> = taskDao.getAllTasks()
+
 
     suspend fun addUser(user: UserData) {
         userDao.addUser(user)
@@ -26,7 +28,7 @@ class UserRepo(private val userDao: UserDao, private val teamDao:TeamDao, privat
         taskDao.AddTask(task)
 
     }
-
+    
     suspend fun getUsersWithTeams(): List<UserWithTeams> {
         return teamDao.getUsersWithTeams()
     }

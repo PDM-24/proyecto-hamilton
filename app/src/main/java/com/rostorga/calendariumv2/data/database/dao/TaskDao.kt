@@ -12,9 +12,11 @@ import com.rostorga.calendariumv2.data.database.entities.UserData
 @Dao
 interface TaskDao{
 
-    @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun AddTask(task : TaskData)
+    @Query("SELECT * FROM tasks")
+    fun getAllTasks(): LiveData<List<TaskData>>
 
-    @Query("SELECT * FROM Tasks")
-    fun getAllTasks(): LiveData<List<UserData>>
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun AddTask(task: TaskData)
+
+
 }
