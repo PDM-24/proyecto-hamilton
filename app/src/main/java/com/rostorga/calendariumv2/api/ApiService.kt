@@ -27,22 +27,27 @@ interface ApiService {
 
     //Post Task
     @Headers(value = ["Content-Type: application/json"])
-    @POST(value = Constants.API_PATH + Constants.TASK_PATH + "/")
+    @POST(value = Constants.API_PATH + Constants.TASK_PATH + '/')
      fun postTask(@Body task: TaskApiObject): Call<ResponseBody>
 
     //Get Tasks From User At day
+     // To get tasks from User At certain month and year simply set argument day to 0
     @Headers(value = ["Content-Type: application/json"])
-    @POST(value = Constants.API_PATH + Constants.TASK_PATH + "/byuser" )
+    @GET(value = Constants.API_PATH + Constants.TASK_PATH + "/byuser" + "/{id}" + "/{day}-{month}-{year}")
     fun getTasksAtDate(
-        @Query("id") id : String,
-        @Query("Day") day : Int,
-        @Query("Month") month : Int,
-        @Query("Year") year : Int
+        @Path("id") id : String,
+        @Path("day") day : Int,
+        @Path("month") month : Int,
+        @Path("year") year : Int
     ): Call<ResponseBody>
 
-    //Get Tasks From User At Month and year
-
     //Get all Tasks From User
+
+    @Headers(value = ["Content-Type: application/json"])
+    @GET(value = Constants.API_PATH + Constants.TASK_PATH + "/byuser" + "/{id}" )
+    fun getTasksFromUser(
+        @Path("id") id : String,
+    ): Call<ResponseBody>
 
     //Delete Task
 }

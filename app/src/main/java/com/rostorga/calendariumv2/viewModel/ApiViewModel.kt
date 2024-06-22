@@ -3,6 +3,8 @@ package com.rostorga.calendariumv2.viewModel
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rostorga.calendariumv2.api.ApiClient
@@ -24,11 +26,14 @@ class ApiViewModel : ViewModel() {
 
     val gson = GsonBuilder().create()
 
+    private val _taskList = MutableLiveData<List<TaskApiObject>>()
+    val taskList: LiveData<List<TaskApiObject>> get() = _taskList
+
     //Converts task json object from api response to our custom TaskApiObject
     fun convertTask(response: ResponseBody): TaskApiObject{
         val json = JSONObject(response.string())
         val body = json.getString("data")
-        val time = JSONObject(body).getString("Tame")
+        val time = JSONObject(body).getString("Time")
 
         val taskObject = gson.fromJson(body, TaskApiObject::class.java)
         taskObject.time = gson.fromJson(time, TaskDurationObject::class.java)
@@ -99,7 +104,7 @@ class ApiViewModel : ViewModel() {
 
     fun postTask(requestData: TaskApiObject): TaskApiObject {
         val call = ApiClient.apiService.postTask(requestData)
-        var returnTask: TaskApiObject = TaskApiObject("","","",1,1,1,
+        var returnTask: TaskApiObject = TaskApiObject("","",1,1,1,
             TaskDurationObject(1223,1440),"")
 
         call.enqueue(object : Callback<ResponseBody> {
@@ -114,27 +119,24 @@ class ApiViewModel : ViewModel() {
             }
 
         })
-
         return returnTask
     }
 
-    fun getTasksFromDate(id : String, day: Int, month: Int, year: Int): List<TaskApiObject> {
+    fun getTasksFromDate(id : String, day: Int, month: Int, year: Int){
         val call = ApiClient.apiService.getTasksAtDate(id, day, month, year)
-        var returnTask: List<TaskApiObject> = listOf(TaskApiObject("","","",1,1,1,
-            TaskDurationObject(1223,1440),""))
 
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 response.body()?.let {
                     val json = JSONObject(it.string())
                     val body = json.getString("data")
-                    val time = JSONObject(body).getString("Time")
 
                     val typeToken = object : TypeToken<List<TaskApiObject>>() {}.type
                     val taskObject = gson.fromJson<List<TaskApiObject>>(body, typeToken)
 
-                    returnTask = taskObject
+                    Log.i("apiviewmodel", taskObject.toString())
 
+                    _taskList.value = taskObject
                 }
             }
 
@@ -143,7 +145,30 @@ class ApiViewModel : ViewModel() {
             }
 
         })
+    }
 
-        return returnTask
+    fun getTasksFromUser(id : String){
+        val call = ApiClient.apiService.getTasksFromUser(id)
+
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                response.body()?.let {
+                    val json = JSONObject(it.string())
+                    val body = json.getString("data")
+
+                    val typeToken = object : TypeToken<List<TaskApiObject>>() {}.type
+                    val taskObject = gson.fromJson<List<TaskApiObject>>(body, typeToken)
+
+                    Log.i("apiviewmodel", taskObject.toString())
+
+                    _taskList.value = taskObject
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Log.i("apiviewmodel", t.message.toString())
+            }
+
+        })
     }
 }

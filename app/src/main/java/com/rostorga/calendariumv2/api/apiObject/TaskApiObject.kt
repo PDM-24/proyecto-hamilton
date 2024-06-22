@@ -5,9 +5,6 @@ import com.google.gson.annotations.SerializedName
 
 
 data class TaskApiObject(
-    @SerializedName(value = "_id")
-    @Expose
-    val id: String? = null,
     
     @SerializedName(value = "Name")
     @Expose
@@ -38,7 +35,11 @@ data class TaskApiObject(
 
     @SerializedName(value = "TeamRef")
     @Expose
-    val team: String? = null
+    val team: String? = null,
+
+    @SerializedName(value = "_id")
+    @Expose
+    val id: String? = null
 )
 
 data class TaskDurationObject(
