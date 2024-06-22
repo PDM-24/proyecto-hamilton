@@ -47,6 +47,8 @@ fun LoginScreen(navController: NavController) {
 
     val api = ApiViewModel()
 
+    var response = remember { mutableStateOf("")}
+
     Column(
         modifier = Modifier
             .background(BackgroundPurple)
@@ -86,7 +88,14 @@ fun LoginScreen(navController: NavController) {
             api.getUser()
             val poster = UserApiObject(UserNameApiObject("Android", "SIgma"),
                 "ANDROX", "937492374", true)
+            val poster1 = UserApiObject(UserNameApiObject("Android1", "SIgma"),
+                "ANDROX", "937492374", true)
+            val poster2 = UserApiObject(UserNameApiObject("Android2", "SIgma"),
+                "ANDROX", "937492374", true)
             api.postUser(poster)
+            api.postUser(poster1)
+            api.postUser(poster2)
+
         }) {
             Text(text = "CLICK ME")
         }
