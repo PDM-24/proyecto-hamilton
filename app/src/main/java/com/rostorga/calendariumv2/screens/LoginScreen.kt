@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,6 +21,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,8 +35,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import com.rostorga.calendariumv2.R
+import com.rostorga.calendariumv2.api.apiObject.TaskApiObject
+import com.rostorga.calendariumv2.api.apiObject.TaskDurationObject
 import com.rostorga.calendariumv2.api.apiObject.UserApiObject
 import com.rostorga.calendariumv2.api.apiObject.UserNameApiObject
 import com.rostorga.calendariumv2.ui.theme.*
@@ -47,7 +53,7 @@ fun LoginScreen(navController: NavController) {
 
     val api = ApiViewModel()
 
-    var response = remember { mutableStateOf("")}
+    val response by api.taskList.observeAsState()
 
     Column(
         modifier = Modifier
@@ -85,19 +91,17 @@ fun LoginScreen(navController: NavController) {
         }
         Spacer(modifier = Modifier.height(40.dp))
         Button(onClick = {
-            api.getUser()
-            val poster = UserApiObject(UserNameApiObject("Android", "SIgma"),
-                "ANDROX", "937492374", true)
-            val poster1 = UserApiObject(UserNameApiObject("Android1", "SIgma"),
-                "ANDROX", "937492374", true)
-            val poster2 = UserApiObject(UserNameApiObject("Android2", "SIgma"),
-                "ANDROX", "937492374", true)
-            api.postUser(poster)
-            api.postUser(poster1)
-            api.postUser(poster2)
-
+            api.getTasksFromUser("6676437a79289581c8fe6699")
         }) {
             Text(text = "CLICK ME")
+        }
+
+        LazyColumn() {
+            if(response != null) {
+                items(response!!) { item ->
+                    Text(text = item.toString(), color = Color.Yellow)
+                }
+            }
         }
 
         Image(
@@ -105,6 +109,8 @@ fun LoginScreen(navController: NavController) {
             modifier = Modifier
                     .align(Alignment.End),
         )
+
+
 
     }
 }
