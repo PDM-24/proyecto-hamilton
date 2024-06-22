@@ -115,7 +115,7 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(scrollState)
-                .padding(32.dp)  // Add padding to avoid overlap with the top bar
+                .padding(64.dp)  // Add padding to avoid overlap with the top bar
         ) {
             for (weekIndex in 0 until weeksBetween) {
                 Column {
@@ -186,8 +186,8 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
 
                                     Box(
                                         modifier = Modifier
-                                            .height(80.dp) // Adjust height as needed
-                                            .background(Color.LightGray) // Adjust background color
+                                            .height(80.dp)
+                                            .width(100.dp)// Adjust height as needed
                                     ) {
                                         tasksForHour.forEach { task ->
                                             TaskCard(task = task)
@@ -217,7 +217,7 @@ fun TaskCard(task: TaskData) {
             .fillMaxWidth()
             .height((durationHours * 60).dp) // Adjust height based on duration
             .padding(2.dp)
-            .background(Color.Cyan) // Adjust color
+            .background(color=Color(0xFFeab676)) // Adjust color
     ) {
         Column {
             Text(text = task.TaskName, fontWeight = FontWeight.Bold)

@@ -345,6 +345,7 @@ fun HomeScreenContent(navController: NavController, userViewModel: UserViewModel
                 Box(
                     Modifier
                         .fillMaxWidth()
+                        .clickable(onClick = { navController.navigate("calendar") })
                         .padding(8.dp)
                         .drawBehind {
                             drawRoundRect(
