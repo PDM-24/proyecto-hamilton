@@ -30,7 +30,7 @@ data class TaskApiObject(
 
     @SerializedName(value = "Time")
     @Expose
-    val time: TaskDurationObject,
+    var time: TaskDurationObject,
 
     @SerializedName(value = "UserRef")
     @Expose
