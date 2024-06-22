@@ -48,11 +48,11 @@ import androidx.compose.ui.window.Dialog
 
 @Composable
 fun profileScreen(onDismiss:()-> Unit) {
-    var username by remember { mutableStateOf(" ") }
-    var email by remember { mutableStateOf(" ") }
-    var teamName by remember { mutableStateOf(" ") }
-    var teamCode by remember { mutableStateOf(" ") }
-    var Password by remember { mutableStateOf(" ") }
+    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var teamName by remember { mutableStateOf("") }
+    var teamCode by remember { mutableStateOf("") }
+    var Password by remember { mutableStateOf("") }
     Dialog(onDismissRequest = { onDismiss() }){
         Box(
             modifier = Modifier
@@ -130,7 +130,6 @@ fun profileScreen(onDismiss:()-> Unit) {
                             OutlinedTextField(
                                 value = Password,
                                 onValueChange = { Password = it },
-                                visualTransformation = PasswordVisualTransformation(),
                                 modifier = Modifier
                                     .height(20.dp)
                                     .fillMaxWidth().padding(8.dp),
@@ -141,9 +140,7 @@ fun profileScreen(onDismiss:()-> Unit) {
                             Text(text = "Password", modifier = Modifier.padding(12.dp))
                             OutlinedTextField(
                                 value = Password,
-                                onValueChange = { Password = it },
-                                visualTransformation = PasswordVisualTransformation(),
-                                modifier = Modifier
+                                onValueChange = { Password = it }, modifier = Modifier
                                     .height(20.dp)
                                     .fillMaxWidth().padding(8.dp),
                                 shape = RoundedCornerShape(15.dp)
