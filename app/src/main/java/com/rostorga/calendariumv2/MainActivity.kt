@@ -31,8 +31,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.rostorga.calendariumv2.screens.LoginScreen
+import com.rostorga.calendariumv2.ui.RegisterScreen
 import com.rostorga.calendariumv2.ui.UserScreen
 import com.rostorga.calendariumv2.ui.theme.Calendariumv2Theme
+import com.rostorga.calendariumv2.viewModel.ApiViewModel
 import com.rostorga.calendariumv2.viewModel.UserViewModel
 
 
@@ -54,13 +57,20 @@ class MainActivity : ComponentActivity() {
 fun MyApp() {
     val navController = rememberNavController()
     val userViewModel: UserViewModel = viewModel()
+    val apiViewModel: ApiViewModel = ApiViewModel()
 
-    NavHost(navController, startDestination = "home") {
+    NavHost(navController, startDestination = "login") {
         composable("home") {
             ViewContainer(navController)
         }
+        composable("login"){
+            LoginScreen(navController)
+        }
         composable("calendar") {
             CalendarScreenContainer(navController, userViewModel)
+        }
+        composable("register"){
+            RegisterScreen(navController, apiViewModel)
         }
     }
 }

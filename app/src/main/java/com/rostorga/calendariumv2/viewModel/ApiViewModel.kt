@@ -20,7 +20,10 @@ import com.google.gson.reflect.TypeToken
 import com.rostorga.calendariumv2.api.apiObject.TaskApiObject
 import com.rostorga.calendariumv2.api.apiObject.TaskDurationObject
 import com.rostorga.calendariumv2.api.apiObject.UserNameApiObject
+import okhttp3.*
 import org.json.JSONObject
+import java.io.IOException
+
 
 class ApiViewModel : ViewModel() {
 
@@ -28,6 +31,10 @@ class ApiViewModel : ViewModel() {
 
     private val _taskList = MutableLiveData<List<TaskApiObject>>()
     val taskList: LiveData<List<TaskApiObject>> get() = _taskList
+
+
+    private val _loginResponse = MutableLiveData<String>()
+    val loginResponse: LiveData<String> get() = _loginResponse
 
     //Converts task json object from api response to our custom TaskApiObject
     fun convertTask(response: ResponseBody): TaskApiObject{
@@ -171,4 +178,38 @@ class ApiViewModel : ViewModel() {
 
         })
     }
-}
+    fun loginUser(username: String, password: String) {
+        val client = OkHttpClient()
+        val requestBody = FormBody.Builder()
+            .add("username", username)
+            .add("password", password)
+            .build()
+        val request = Request.Builder()
+            .url("https://58e2f7e2-3995-4a9a-ab9e-8087359857a9.mock.pstmn.io/user/login")  // Use your Postman mock server URL
+            .post(requestBody)
+            .build()
+
+        client.newCall(request).enqueue(object : okhttp3.Callback {
+            override fun onFailure(call: okhttp3.Call, e: IOException) {
+                _loginResponse.postValue("Login failed, check your username and password!")
+            }
+
+            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                if (response.isSuccessful) {
+                    response.body?.string()?.let {
+                        val json = JSONObject(it)
+                        val token = json.getString("token")
+                        _loginResponse.postValue("Login successful!")
+                    }
+                } else {
+                    _loginResponse.postValue("Login failed")
+                }
+            }
+        })
+    }
+
+    }
+
+
+
+
