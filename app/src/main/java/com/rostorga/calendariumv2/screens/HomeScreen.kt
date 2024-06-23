@@ -1,6 +1,7 @@
 import android.annotation.SuppressLint
 import android.app.Application
 import android.os.Build
+import android.view.Menu
 import android.widget.CalendarView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -14,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -44,6 +46,7 @@ import com.rostorga.calendariumv2.viewModel.UserViewModel
 import com.rostorga.calendariumv2.data.database.entities.TaskData
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.navigation.NavController
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -61,12 +64,20 @@ fun ViewContainer(navController: NavController) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToolBar() {
+    val imagePainter: Painter = painterResource(id = R.drawable.cat)
 
     var showProfile by remember { mutableStateOf(false) }
 
     if (showProfile) {
-        profileScreen(onDismiss = { showProfile = false })
+        profileScreen(onDismiss = { showProfile = false }, image= imagePainter)
     }
+
+    var DrawerContentt by remember { mutableStateOf(false) }
+
+    if (DrawerContentt) {
+        profileScreen(onDismiss = { DrawerContentt = false },image= imagePainter)
+    }
+
 
     TopAppBar(title = {
         Row(
@@ -76,7 +87,9 @@ fun ToolBar() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(painter = painterResource(id = R.drawable.menuicon), contentDescription = null, modifier = Modifier.size(50.dp))
+            Image(painter = painterResource(id = R.drawable.menuicon), contentDescription = null, modifier = Modifier
+                .size(50.dp).clickable {  })
+
             Image(painter = painterResource(id = R.drawable.user), contentDescription = null, modifier = Modifier
                 .size(36.dp)
                 .clickable { showProfile = true })
@@ -228,8 +241,8 @@ fun AddTaskPopUp(
 @Composable
 fun CalendarDialogPopUp(
     onDismiss: () -> Unit,
-    onDateSelected: (String) -> Unit
-) {
+    onDateSelected: (String) -> Unit)
+{
     var date by remember { mutableStateOf("") }
     val context = LocalContext.current
 
@@ -370,9 +383,15 @@ fun HomeScreenContent(navController: NavController, userViewModel: UserViewModel
     }
 }
 
+
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun AddTaskPopUpPreview() {
-    AddTaskPopUp(onDismiss = {}, onNext = {}, userViewModel = UserViewModel(application = Application()), selectedDate = "01 - 01 - 2023", navController = NavController(LocalContext.current))
+    AddTaskPopUp(onDismiss = {},
+        onNext = {},
+        userViewModel = UserViewModel(application = Application()),
+        selectedDate = "01 - 01 - 2023",
+        navController = NavController(LocalContext.current))
 }
