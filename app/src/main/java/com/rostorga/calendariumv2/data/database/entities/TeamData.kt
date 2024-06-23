@@ -25,11 +25,9 @@ data class TeamData(
     @ColumnInfo(name="TeamCode")
     val teamCode: String,
 
-    //this is the FK
+    //this is the leader id
     @ColumnInfo(name="PersonId")
     val PersonId: Int
-
-
 
 
 )

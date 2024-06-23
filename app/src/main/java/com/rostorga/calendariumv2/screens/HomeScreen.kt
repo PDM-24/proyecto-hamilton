@@ -45,14 +45,15 @@ import com.rostorga.calendariumv2.data.database.entities.TaskData
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavController
+import com.rostorga.calendariumv2.viewModel.ApiViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun ViewContainer(navController: NavController) {
+fun ViewContainer(navController: NavController, apiViewModel: ApiViewModel) {
     Scaffold(
         topBar = { ToolBar() },
-        content = { HomeScreenContent(navController) },
+        content = { HomeScreenContent(navController, userViewModel = UserViewModel(Application()) ,apiViewModel) },
         floatingActionButton = { FAB(navController) },
         floatingActionButtonPosition = FabPosition.End
     )
@@ -257,14 +258,14 @@ fun CalendarDialogPopUp(
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenContent(navController: NavController, userViewModel: UserViewModel = viewModel()) {
+fun HomeScreenContent(navController: NavController, userViewModel: UserViewModel = viewModel(), apiViewModel: ApiViewModel) {
     val tasks by userViewModel.allTasks.observeAsState(initial = emptyList())
     var date by remember { mutableStateOf("") }
 
     var showCreateTeam by remember { mutableStateOf(false) }
 
     if (showCreateTeam) {
-        CreateOrJoinTeam(onDismiss = { showCreateTeam = false }, userViewModel=userViewModel)
+        CreateOrJoinTeam(onDismiss = { showCreateTeam = false }, userViewModel=userViewModel, apiViewModel)
     }
 
     val stroke = Stroke(

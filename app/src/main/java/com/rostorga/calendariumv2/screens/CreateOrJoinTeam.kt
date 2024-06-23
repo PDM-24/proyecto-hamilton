@@ -21,27 +21,29 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.rostorga.calendariumv2.screens.JoinTeam
 import com.rostorga.calendariumv2.screens.CreateTeam
+import com.rostorga.calendariumv2.viewModel.ApiViewModel
 import com.rostorga.calendariumv2.viewModel.UserViewModel
 
 
 @Composable
 fun CreateOrJoinTeam(
     onDismiss:()->Unit,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    apiViewModel: ApiViewModel
 
 ) {
 
     var showJoinTeam by remember { mutableStateOf(false) }
 
     if (showJoinTeam) {
-        JoinTeam(onDismiss = { showJoinTeam = false })
+        JoinTeam(onDismiss = { showJoinTeam = false }, userViewModel = userViewModel)
     }
 
 
     var showCreateTeam by remember{ mutableStateOf(false)}
 
     if (showCreateTeam) {
-        CreateTeam(onDismiss = { showCreateTeam = false }, userViewModel = userViewModel)
+        CreateTeam(onDismiss = { showCreateTeam = false }, userViewModel = userViewModel, apiViewModel = apiViewModel)
 
     }
 

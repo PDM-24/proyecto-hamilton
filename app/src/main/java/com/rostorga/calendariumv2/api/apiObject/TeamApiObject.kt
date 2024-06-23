@@ -15,11 +15,9 @@ data class TeamApiObject(
     @Expose
     val code: String,
 
-
-
-
-
-
+    @SerializedName(value="Leader")
+    @Expose
+    val leader: String,
 
 )
 

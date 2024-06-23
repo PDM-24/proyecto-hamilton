@@ -5,22 +5,22 @@ import com.google.gson.annotations.SerializedName
 
 
 data class TaskApiObject(
-    
+
     @SerializedName(value = "Name")
     @Expose
     val name: String,
-    
+
     @SerializedName(value = "Description")
     val description: String,
-    
+
     @SerializedName(value = "Day")
     @Expose
     val day: Int,
-    
+
     @SerializedName(value = "Month")
     @Expose
     val month: Int,
-    
+
     @SerializedName(value = "Year")
     @Expose
     val year: Int,
@@ -35,7 +35,7 @@ data class TaskApiObject(
 
     @SerializedName(value = "TeamRef")
     @Expose
-    val team: String? = null,
+    var team: String? = null,
 
     @SerializedName(value = "_id")
     @Expose
@@ -44,7 +44,7 @@ data class TaskApiObject(
 
 data class TaskDurationObject(
     @SerializedName(value = "Start")
-    @Expose 
+    @Expose
     val start: Int,
 
     @SerializedName(value = "End")

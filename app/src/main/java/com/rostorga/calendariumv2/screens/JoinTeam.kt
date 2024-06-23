@@ -1,5 +1,6 @@
 package com.rostorga.calendariumv2.screens
 
+import android.app.Application
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,8 +20,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,20 +34,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-
+import com.rostorga.calendariumv2.viewModel.UserViewModel
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun JoinTeam(
-
-    onDismiss:()->Unit
-
+    onDismiss:()->Unit,
+    userViewModel: UserViewModel
 
 ) {
 
     val context = LocalContext.current
 
     var teamCode by remember { mutableStateOf(" ") }
+    val users by userViewModel.getAllData.observeAsState(initial = emptyList())
+    val scope = rememberCoroutineScope()
+
 
     Dialog(onDismissRequest = { onDismiss() }){
 
@@ -92,7 +98,14 @@ fun JoinTeam(
 
                     Button(
                         onClick = {
-                                  Toast.makeText(context, "You joined the team! Welcome!", Toast.LENGTH_SHORT).show()
+                            scope.launch {
+                                if (users.isNotEmpty()){
+                                    val user = users.first()
+                                    userViewModel.joinTeam(user.id,teamCode)
+                                    Toast.makeText(context, "You joined the team! Welcome!", Toast.LENGTH_SHORT).show()
+                                    onDismiss()// to delete it after
+                                }
+                            }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                     ) {
@@ -118,6 +131,6 @@ fun JoinTeam(
 @Preview(showBackground = true)
 @Composable
 fun PreviewJoinTeam() {
-    JoinTeam(onDismiss = {})
+    JoinTeam(onDismiss = {}, userViewModel = UserViewModel(application = Application()))
 }
 

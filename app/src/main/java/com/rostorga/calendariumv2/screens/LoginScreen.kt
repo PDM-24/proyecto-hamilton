@@ -32,7 +32,6 @@ import androidx.navigation.NavController
 import com.rostorga.calendariumv2.R
 import com.rostorga.calendariumv2.viewModel.ApiViewModel
 import com.rostorga.calendariumv2.ui.theme.*
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 @Composable
 fun LoginScreen(navController: NavController) {
@@ -88,7 +87,7 @@ fun LoginScreen(navController: NavController) {
             verticalArrangement = Arrangement.Center
         ) {
             Button(onClick = {
-                api.loginUser(userName.text, password.text)
+                api.loginUser(username=userName.text, password=password.text)
             }) {
                 Text(text = "Login")
             }
