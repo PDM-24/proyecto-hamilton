@@ -60,7 +60,7 @@ fun UserScreen(userViewModel: UserViewModel = viewModel()) {
                 modifier = Modifier.fillMaxWidth()
             )
             TextField(
-                value = lastName,
+                value = lastName ,
                 onValueChange = { lastName = it },
                 label = { Text("Last Name") },
                 modifier = Modifier.fillMaxWidth()
