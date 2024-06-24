@@ -6,6 +6,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
@@ -15,10 +16,12 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -89,7 +92,7 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
     LaunchedEffect(highlightOption) {
         if (highlightOption != 0) {
             highlightedSlots.value = highlightFreeSlots(tasks, highlightOption)
-            delay(3000) // Adjust delay as needed (e.g., 3000 milliseconds = 3 seconds)
+            delay(1500) // Adjust delay as needed (e.g., 3000 milliseconds = 3 seconds)
             highlightedSlots.value = emptyList()
             highlightOption = 0
         }
@@ -98,7 +101,7 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = Color.White)
+            .background(color = Color(0xFFF0F0F0))
     ) {
         // Horizontal scrolling for weeks
         Row(
@@ -113,7 +116,7 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
                     Row(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Spacer(modifier = Modifier.width(60.dp)) // Leave space for the hours
+                        Spacer(modifier = Modifier.width(70.dp)) // Leave space for the hours
                         for (i in 0..6) {
                             val day = currentDate.plusDays((weekIndex * 7 + i).toLong())
                             Box(
@@ -194,20 +197,11 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
             }
         }
     }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        Button(onClick = { highlightOption = 1 }) {
-            Text("Free Slots 1")
-        }
-        Button(onClick = { highlightOption = 2 }) {
-            Text("Free Slots 2")
-        }
-        Button(onClick = { highlightOption = 3 }) {
-            Text("Free Slots 3")
+    Box(
+        modifier = Modifier.padding(top=700.dp, start = 190.dp)) {
+
+        Button(onClick = { highlightOption = 3 }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF8B930))) {
+            Text("Free time!", color = Color.Black)
         }
     }
 
@@ -262,13 +256,16 @@ fun TaskCard(task: TaskData) {
         modifier = Modifier
             .fillMaxWidth()
             .height((durationHours * 60).dp) // Adjust height based on duration
-            .padding(2.dp)
+            .padding(1.dp)
+            .clip(shape= RoundedCornerShape(12.dp))
             .background(color = Color(0xFFeab676)) // Adjust color
     ) {
-        Column {
-            Text(text = task.TaskName, fontWeight = FontWeight.Bold)
-            Text(text = "${task.TimeStart} - ${task.TimeFinish}")
-            Text(text = task.TaskDesc)
+        Column(
+            modifier=Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = task.TaskName, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            Text(text = "${task.TimeStart} - ${task.TimeFinish}", fontSize = 14.sp)
         }
     }
 }
