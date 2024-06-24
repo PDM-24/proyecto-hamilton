@@ -68,7 +68,7 @@ fun UserScreen(navController: NavController,userViewModel: UserViewModel = viewM
                 modifier = Modifier.fillMaxWidth()
             )
             TextField(
-                value = lastName,
+                value = lastName ,
                 onValueChange = { lastName = it },
                 label = { Text("Last Name") },
                 modifier = Modifier.fillMaxWidth()
