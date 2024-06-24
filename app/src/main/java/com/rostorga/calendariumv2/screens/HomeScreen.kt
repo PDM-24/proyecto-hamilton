@@ -48,6 +48,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.navigation.NavController
+import com.rostorga.calendariumv2.screens.num
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -64,18 +65,53 @@ fun ViewContainer(navController: NavController) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToolBar() {
-    val imagePainter: Painter = painterResource(id = R.drawable.cat)
+    val x : Painter
+    val imagePainter = painterResource(id = R.drawable.user_circle)
+    val imagePainter1 = painterResource(id = R.drawable.angry)
+    val imagePainter2 = painterResource(id = R.drawable.bear)
+    val imagePainter3 = painterResource(id = R.drawable.buffalo)
+    val imagePainter4 = painterResource(id = R.drawable.bunny)
+    val imagePainter5 = painterResource(id = R.drawable.cat)
+    val imagePainter6= painterResource(id = R.drawable.dog)
+    val imagePainter7 = painterResource(id = R.drawable.elephant)
+    val imagePainter8 = painterResource(id = R.drawable.fox)
+    val imagePainter9 = painterResource(id = R.drawable.horse)
+    val imagePainter10 = painterResource(id = R.drawable.leon)
+    val imagePainter11 = painterResource(id = R.drawable.leopard)
+    val imagePainter12 = painterResource(id = R.drawable.lobocafe)
+    val imagePainter13 = painterResource(id = R.drawable.rhinoceros)
+    val imagePainter14 = painterResource(id = R.drawable.sparrow)
+    val imagePainter15 = painterResource(id = R.drawable.wolf)
+
+    when( num.Numero.value){
+        1-> {x = imagePainter1}
+        2-> {x = imagePainter2}
+        3-> {x = imagePainter3}
+        4-> {x = imagePainter4}
+        5-> {x = imagePainter5}
+        6-> {x = imagePainter6 }
+        7-> {x = imagePainter7}
+        8-> {x = imagePainter8}
+        9-> {x = imagePainter9}
+        10-> {x = imagePainter10}
+        11-> {x = imagePainter11 }
+        12-> {x = imagePainter12}
+        13-> {x = imagePainter13}
+        14-> {x = imagePainter14}
+        15-> {x = imagePainter15}
+        else ->{x = imagePainter}
+    }
 
     var showProfile by remember { mutableStateOf(false) }
 
     if (showProfile) {
-        profileScreen(onDismiss = { showProfile = false }, image= imagePainter)
+        profileScreen(onDismiss = { showProfile = false }, image= x)
     }
 
     var DrawerContentt by remember { mutableStateOf(false) }
 
     if (DrawerContentt) {
-        profileScreen(onDismiss = { DrawerContentt = false },image= imagePainter)
+        profileScreen(onDismiss = { DrawerContentt = false },image= x)
     }
 
 

@@ -49,16 +49,47 @@ val images = listOf(
 
 @Composable
 fun MyScreen() {
-    val imagePainter = painterResource(id = R.drawable.angry)
-
+    val imagePainter = painterResource(id = R.drawable.user_circle)
+    val imagePainter1 = painterResource(id = R.drawable.angry)
+    val imagePainter2 = painterResource(id = R.drawable.bear)
+    val imagePainter3 = painterResource(id = R.drawable.buffalo)
+    val imagePainter4 = painterResource(id = R.drawable.bunny)
+    val imagePainter5 = painterResource(id = R.drawable.cat)
+    val imagePainter6= painterResource(id = R.drawable.dog)
+    val imagePainter7 = painterResource(id = R.drawable.elephant)
+    val imagePainter8 = painterResource(id = R.drawable.fox)
+    val imagePainter9 = painterResource(id = R.drawable.horse)
+    val imagePainter10 = painterResource(id = R.drawable.leon)
+    val imagePainter11 = painterResource(id = R.drawable.leopard)
+    val imagePainter12 = painterResource(id = R.drawable.lobocafe)
+    val imagePainter13 = painterResource(id = R.drawable.rhinoceros)
+    val imagePainter14 = painterResource(id = R.drawable.sparrow)
+    val imagePainter15 = painterResource(id = R.drawable.wolf)
 
     Column(
         modifier = Modifier.padding(16.dp)
     ) {
-        CircleWithImage(image = imagePainter)
+        when(num.Numero.value ){
+            1-> {CircleWithImage(image = imagePainter1)}
+            2-> {CircleWithImage(image = imagePainter2)}
+            3-> {CircleWithImage(image = imagePainter3)}
+            4-> {CircleWithImage(image = imagePainter4)}
+            5-> {CircleWithImage(image = imagePainter5)}
+            6-> {CircleWithImage(image = imagePainter6)}
+            7-> {CircleWithImage(image = imagePainter7)}
+            8-> {CircleWithImage(image = imagePainter8)}
+            9-> {CircleWithImage(image = imagePainter9)}
+            10-> {CircleWithImage(image = imagePainter10)}
+            11-> {CircleWithImage(image = imagePainter11)}
+            12-> {CircleWithImage(image = imagePainter12)}
+            13-> {CircleWithImage(image = imagePainter13)}
+            14-> {CircleWithImage(image = imagePainter14)}
+            15-> {CircleWithImage(image = imagePainter15)}
+            else ->{CircleWithImage(image = imagePainter)}
+        }
 
         Text(
-            text = "imagen: ${num.Numero.value +1 }",
+            text = "imagen: ${num.Numero.value  }",
             modifier = Modifier.padding(bottom = 16.dp).align(Alignment.CenterHorizontally)
         )
 
