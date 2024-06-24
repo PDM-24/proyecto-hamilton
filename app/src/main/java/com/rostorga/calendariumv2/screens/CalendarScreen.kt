@@ -4,6 +4,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -54,6 +55,16 @@ fun CalendarScreenContainer(navController: NavHostController) {
                 CalendarScreen(navController = navController)
             }
         },
+        bottomBar = {
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                        contentAlignment = Alignment.Center){
+
+
+                    }
+        }
+        ,
         floatingActionButton = { CalendarFAB() },
         floatingActionButtonPosition = FabPosition.End
     )
@@ -122,7 +133,7 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
                             Box(
                                 modifier = Modifier
                                     .width(100.dp)
-                                    .clip(shape=RoundedCornerShape(12.dp))
+                                    .clip(shape = RoundedCornerShape(12.dp))
                                     .padding(2.dp)
                                     .background(Color.LightGray)
                             ) {
@@ -206,6 +217,7 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
             Text("Free time!", color = Color.Black)
         }
     }
+
 }
 
 @RequiresApi(Build.VERSION_CODES.O)

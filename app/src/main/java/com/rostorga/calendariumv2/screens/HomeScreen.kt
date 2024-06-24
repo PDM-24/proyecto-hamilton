@@ -1,6 +1,7 @@
 import android.annotation.SuppressLint
 import android.app.Application
 import android.os.Build
+import android.util.Log
 import android.widget.CalendarView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -257,11 +258,18 @@ fun CalendarDialogPopUp(
 fun HomeScreenContent(navController: NavController, userViewModel: UserViewModel = viewModel(), apiViewModel: ApiViewModel) {
     val tasks by userViewModel.allTasks.observeAsState(initial = emptyList())
     var date by remember { mutableStateOf("") }
+    val currentUserId by apiViewModel.currentUserId.observeAsState()
+
 
     var showCreateTeam by remember { mutableStateOf(false) }
 
     if (showCreateTeam) {
-        CreateOrJoinTeam(onDismiss = { showCreateTeam = false }, userViewModel=userViewModel, apiViewModel)
+        currentUserId?.let { userId ->
+            CreateOrJoinTeam(userId = userId, onDismiss = { showCreateTeam = false }, userViewModel=userViewModel, apiViewModel)
+        } ?: run {
+            // Handle null user ID: show error message or log out
+            Log.e("HomeScreenContent", "User ID is null. User might not be logged in.")
+        }
     }
 
     val stroke = Stroke(

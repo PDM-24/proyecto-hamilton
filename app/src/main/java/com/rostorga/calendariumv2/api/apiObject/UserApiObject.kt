@@ -28,8 +28,6 @@ data class UserNameApiObject(
 )
 
 data class UserLogin(
-    @SerializedName("UserName")
     val username: String,
-    @SerializedName("Password")
     val password: String
 )

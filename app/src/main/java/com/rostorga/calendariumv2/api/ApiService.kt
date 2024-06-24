@@ -14,8 +14,9 @@ import retrofit2.http.Path
 
 interface ApiService {
 
-    @POST(value = Constants.API_PATH + Constants.USER_PATH + "user/login")
+    @POST("http://localhost:3000/api/user/login")
     fun loginUser(@Body credentials: UserLogin): Call<ResponseBody>
+
     //Post User
     @Headers(value = ["Content-Type: application/json"])
     @POST(value = Constants.API_PATH + Constants.USER_PATH + '/')

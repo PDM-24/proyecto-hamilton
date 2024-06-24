@@ -28,9 +28,9 @@ import com.rostorga.calendariumv2.data.database.entities.TeamData
 import com.rostorga.calendariumv2.viewModel.ApiViewModel
 import com.rostorga.calendariumv2.viewModel.UserViewModel
 import kotlinx.coroutines.launch
-
 @Composable
 fun CreateTeam(
+    userId: String,  // Ensure this parameter is accepted
     onDismiss: () -> Unit,
     userViewModel: UserViewModel = viewModel(),
     apiViewModel: ApiViewModel = viewModel()
@@ -38,8 +38,6 @@ fun CreateTeam(
     var teamName by remember { mutableStateOf(TextFieldValue("")) }
     var teamCode by remember { mutableStateOf(TextFieldValue("")) }
 
-    val usersWithTeams by userViewModel.usersWithTeams.observeAsState(emptyList())
-    val users by userViewModel.getAllData.observeAsState(initial = emptyList())
     val currentUserId by apiViewModel.currentUserId.observeAsState()
 
     val scope = rememberCoroutineScope()
@@ -66,28 +64,7 @@ fun CreateTeam(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(4.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(10.dp)
-                                .clip(CircleShape)
-                                .background(color = Color.White)
-                        )
-                        Text(text = "Lets give it a name!", color = Color.White, fontSize = 20.sp)
-                        Box(
-                            modifier = Modifier
-                                .size(10.dp)
-                                .clip(CircleShape)
-                                .background(color = Color.White)
-                        )
-                    }
-
+                    Text(text = "Let's give it a name!", color = Color.White, fontSize = 20.sp)
                     Spacer(modifier = Modifier.height(20.dp))
 
                     OutlinedTextField(
@@ -117,28 +94,16 @@ fun CreateTeam(
                     Button(
                         onClick = {
                             scope.launch {
-                                try {
-                                    if (users.isNotEmpty() && currentUserId !=null) {
-                                        val user = users.first()
-                                        val team = TeamData(
-                                            teamName = teamName.text,
-                                            teamCode = teamCode.text,
-                                            PersonId = user.id
-                                        )
-                                        userViewModel.addTeam(team)
-                                        Log.d("CreateTeam", "Team added: $team")
-
-                                        // Creating TeamApiObject with the current user's ID as the leader
-                                        val apiTeam = TeamApiObject(
-                                            name = teamName.text,
-                                            code = teamCode.text,
-                                            leader = currentUserId.toString() // Using the current user's ID
-                                        )
-                                        apiViewModel.postTeam(apiTeam)
-
-                                    }
-                                } catch (e: Exception) {
-                                    Log.e("CreateTeam", "Error adding team", e)
+                                if (teamName.text.isNotBlank() && teamCode.text.isNotBlank() && currentUserId != null) {
+                                    // Create TeamApiObject with current user's ID as the leader
+                                    val apiTeam = TeamApiObject(
+                                        name = teamName.text,
+                                        code = teamCode.text,
+                                        leader = currentUserId!! // Assuming 'leader' is a String. Adjust if necessary
+                                    )
+                                    apiViewModel.postTeam(apiTeam)
+                                } else {
+                                    Toast.makeText(context, "Please ensure all fields are filled and you are logged in.", Toast.LENGTH_LONG).show()
                                 }
                             }
                         },

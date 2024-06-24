@@ -15,6 +15,7 @@ import com.google.gson.reflect.TypeToken
 import com.rostorga.calendariumv2.api.apiObject.TaskApiObject
 import com.rostorga.calendariumv2.api.apiObject.TaskDurationObject
 import com.rostorga.calendariumv2.api.apiObject.TeamApiObject
+import com.rostorga.calendariumv2.api.apiObject.UserLogin
 import com.rostorga.calendariumv2.api.apiObject.UserNameApiObject
 import okhttp3.*
 import org.json.JSONObject
@@ -27,36 +28,34 @@ class ApiViewModel : ViewModel() {
     private val _taskList = MutableLiveData<List<TaskApiObject>>()
     val taskList: LiveData<List<TaskApiObject>> get() = _taskList
 
-    private val _currentUserId = MutableLiveData<String>()
-    val currentUserId: LiveData<String> get() = _currentUserId
-
-    //this is for the login
-    private val _loginResponse = MutableLiveData<String>()
-    val loginResponse: LiveData<String> get() = _loginResponse
+    val loginResponse = MutableLiveData<String>()
+    val currentUserId = MutableLiveData<String>()
 
     private val _registeredUserId = MutableLiveData<String?>()
     val registeredUserId: MutableLiveData<String?> get() = _registeredUserId
-//this is to retrieve the id
-fun registerUser(user: UserApiObject) {
-    val call = ApiClient.apiService.postUser(user)
-    call.enqueue(object : Callback<ResponseBody> {
-        override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-            if (response.isSuccessful) {
-                response.body()?.let {
-                    val userObject = convertUser(it)
-                    _registeredUserId.postValue(userObject.id)
-                    Log.d("ApiViewModel", "Registered User ID: ${userObject.id}")
-                }
-            } else {
-                Log.e("ApiViewModel", "Failed to register user: ${response.code()}")
-            }
-        }
 
-        override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-            Log.e("ApiViewModel", "Error registering user", t)
-        }
-    })
-}
+    //this is to retrieve the id
+    fun registerUser(user: UserApiObject) {
+        val call = ApiClient.apiService.postUser(user)
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        val userObject = convertUser(it)
+                        _registeredUserId.postValue(userObject.id)
+                        Log.d("ApiViewModel", "Registered User ID: ${userObject.id}")
+                    }
+                } else {
+                    Log.e("ApiViewModel", "Failed to register user: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Log.e("ApiViewModel", "Error registering user", t)
+            }
+        })
+    }
+
     //Converts task json object from api response to our custom TaskApiObject
     fun convertTask(response: ResponseBody): TaskApiObject {
         val json = JSONObject(response.string())
@@ -129,7 +128,8 @@ fun registerUser(user: UserApiObject) {
         val call = ApiClient.apiService.postUser(requestData)
         var returnUser: UserApiObject = UserApiObject(
             UserNameApiObject("", ""),
-            "", "", "")
+            "", "", ""
+        )
 
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
@@ -238,61 +238,56 @@ fun registerUser(user: UserApiObject) {
         })
     }
 
+
     fun loginUser(username: String, password: String) {
-        val client = OkHttpClient()
-        val requestBody = FormBody.Builder()
-            .add("username", username)
-            .add("password", password)
-            .build()
-        val request = Request.Builder()
-            .url("https://58e2f7e2-3995-4a9a-ab9e-8087359857a9.mock.pstmn.io/user/login")
-            .post(requestBody)
-            .build()
-
-        client.newCall(request).enqueue(object : okhttp3.Callback {
-            override fun onFailure(call: okhttp3.Call, e: IOException) {
-                _loginResponse.postValue("Login failed, check your username and password!")
-            }
-
-            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+        val userLogin = UserLogin(username, password)
+        val call = ApiClient.apiService.loginUser(userLogin)
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful) {
-                    response.body?.string()?.let {
-                        Log.d("ApiViewModel", "Response JSON: $it")  // Log the entire JSON response
-
+                    response.body()?.let { responseBody ->
                         try {
-                            val json = JSONObject(it)
-                            val token = json.optString("token", null)
-
-                            if (token != null) {
-                                Log.d("ApiViewModel", "Token: $token")
-
-                                // Try to get user info, assuming different structure
-                                val userInfo = json.optJSONObject("user") ?: json
-                                val userId = userInfo.optString("_id", "N/A")
-                                val userFirstName = userInfo.optJSONObject("Name")?.optString("first", "N/A") ?: "N/A"
-                                val userLastName = userInfo.optJSONObject("Name")?.optString("last", "N/A") ?: "N/A"
-                                val userName = userInfo.optString("UserName", "N/A")
-
-                                _currentUserId.postValue(userId)
-                                _loginResponse.postValue("Login successful!")
-
-                                // Log user details
-                                Log.d("ApiViewModel", "User ID: $userId")
-                                Log.d("ApiViewModel", "User First Name: $userFirstName")
-                                Log.d("ApiViewModel", "User Last Name: $userLastName")
-                                Log.d("ApiViewModel", "User Name: $userName")
+                            val jsonResponse = JSONObject(responseBody.string())
+                            val dataArray = jsonResponse.getJSONArray("data")
+                            if (dataArray.length() > 0) {
+                                val userData = dataArray.getJSONObject(0)
+                                val userId = userData.optString("_id", "N/A")
+                                if (userId != "N/A") {
+                                    currentUserId.postValue(userId)
+                                    loginResponse.postValue("Login successful! User ID: $userId")
+                                } else {
+                                    loginResponse.postValue("Login failed: User ID not found in response")
+                                    Log.e("ApiViewModel", "User ID not found in JSON response")
+                                }
                             } else {
-                                _loginResponse.postValue("Login failed: token missing in response")
+                                loginResponse.postValue("Login failed: No user data found")
+                                Log.e("ApiViewModel", "No user data found in JSON response")
                             }
                         } catch (e: Exception) {
+                            loginResponse.postValue("Login failed: Error parsing response")
                             Log.e("ApiViewModel", "Error parsing JSON response", e)
-                            _loginResponse.postValue("Login failed: error parsing response")
                         }
+                    } ?: run {
+                        loginResponse.postValue("Login failed: Empty response")
+                        Log.e("ApiViewModel", "Received empty response body")
                     }
                 } else {
-                    _loginResponse.postValue("Login failed")
+                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                    loginResponse.postValue("Login failed: $errorBody")
+                    Log.e("ApiViewModel", "Login failed with HTTP error: $errorBody")
                 }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                loginResponse.postValue("Login failed, check your network connection!")
+                Log.e("ApiViewModel", "Network call failed", t)
             }
         })
     }
+
+
 }
+
+
+
+

@@ -27,6 +27,7 @@ import com.rostorga.calendariumv2.viewModel.UserViewModel
 
 @Composable
 fun CreateOrJoinTeam(
+    userId: String,  // Add this line
     onDismiss:()->Unit,
     userViewModel: UserViewModel,
     apiViewModel: ApiViewModel
@@ -34,21 +35,17 @@ fun CreateOrJoinTeam(
 ) {
 
     var showJoinTeam by remember { mutableStateOf(false) }
-
     if (showJoinTeam) {
         JoinTeam(onDismiss = { showJoinTeam = false }, userViewModel = userViewModel)
     }
 
-
-    var showCreateTeam by remember{ mutableStateOf(false)}
-
+    var showCreateTeam by remember { mutableStateOf(false) }
     if (showCreateTeam) {
-        CreateTeam(onDismiss = { showCreateTeam = false }, userViewModel = userViewModel, apiViewModel = apiViewModel)
-
+        CreateTeam(userId = userId, onDismiss = { showCreateTeam = false }, userViewModel = userViewModel, apiViewModel = apiViewModel)
     }
 
 
-    Dialog(onDismissRequest = { onDismiss() }){
+    Dialog(onDismissRequest = { onDismiss() }) {
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
@@ -68,7 +65,7 @@ fun CreateOrJoinTeam(
                 ) {
                     Text(text = "Want to create a team?", color = Color.White, fontSize = 20.sp)
                     Button(
-                        onClick = { showCreateTeam=true },
+                        onClick = { showCreateTeam = true },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                     ) {
                         Text(text = "Create!", color = Color.Black)
@@ -84,16 +81,14 @@ fun CreateOrJoinTeam(
                 ) {
                     Text(text = "Want to join a team?", color = Color.White, fontSize = 20.sp)
                     Button(
-                        onClick = { showJoinTeam=true },
+                        onClick = { showJoinTeam = true },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                     ) {
                         Text(text = "Join!", color = Color.Black)
                     }
                 }
             }
-
         }
-
     }
 
 }
