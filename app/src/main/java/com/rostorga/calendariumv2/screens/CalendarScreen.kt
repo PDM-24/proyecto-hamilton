@@ -3,36 +3,15 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,11 +24,11 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.rostorga.calendariumv2.data.database.entities.TaskData
 import com.rostorga.calendariumv2.viewModel.UserViewModel
-import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -104,6 +83,17 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
     val weeksBetween = (daysBetween / 7) + 1
 
     val scrollState = rememberScrollState()
+    val highlightedSlots = remember { mutableStateOf<List<Pair<LocalDate, LocalTime>>>(emptyList()) }
+    var highlightOption by remember { mutableStateOf(0) }
+
+    LaunchedEffect(highlightOption) {
+        if (highlightOption != 0) {
+            highlightedSlots.value = highlightFreeSlots(tasks, highlightOption)
+            delay(3000) // Adjust delay as needed (e.g., 3000 milliseconds = 3 seconds)
+            highlightedSlots.value = emptyList()
+            highlightOption = 0
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -115,11 +105,11 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(scrollState)
-                .padding(64.dp)  // Add padding to avoid overlap with the top bar
+                .padding(top = 64.dp)  // Add padding to avoid overlap with the top bar
         ) {
             for (weekIndex in 0 until weeksBetween) {
                 Column {
-                    // days of the week
+                    // Days of the week
                     Row(
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -158,7 +148,7 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
                                 Box(
                                     modifier = Modifier
                                         .height(70.dp) // Adjust height as needed
-                                        .padding(4.dp)
+                                        .padding(2.dp)
                                 ) {
                                     Text(
                                         text = String.format("%02d:00", hour),
@@ -169,12 +159,12 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
                         }
 
                         // Days and tasks grid
-                        for (i in 0..6) {
+                        for (i in 0..7) {
                             val day = currentDate.plusDays((weekIndex * 7 + i).toLong())
                             Column(
                                 modifier = Modifier
                                     .width(100.dp)
-                                    .padding(8.dp)
+                                    .padding(2.dp)
                             ) {
                                 for (hour in 0..23) {
                                     val tasksForHour = tasks.filter { task ->
@@ -184,10 +174,13 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
                                         taskDate == day && (taskStartHour <= hour && taskEndHour >= hour)
                                     }
 
+                                    val isFreeSlot = highlightedSlots.value.any { it.first == day && it.second.hour == hour }
+
                                     Box(
                                         modifier = Modifier
-                                            .height(80.dp)
-                                            .width(100.dp)// Adjust height as needed
+                                            .height(90.dp)
+                                            .width(100.dp)
+                                            .background(if (isFreeSlot) Color(0xFFf8ed77) else Color.Transparent)
                                     ) {
                                         tasksForHour.forEach { task ->
                                             TaskCard(task = task)
@@ -201,6 +194,59 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
             }
         }
     }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        Button(onClick = { highlightOption = 1 }) {
+            Text("Free Slots 1")
+        }
+        Button(onClick = { highlightOption = 2 }) {
+            Text("Free Slots 2")
+        }
+        Button(onClick = { highlightOption = 3 }) {
+            Text("Free Slots 3")
+        }
+    }
+
+
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun highlightFreeSlots(tasks: List<TaskData>, highlightOption: Int): List<Pair<LocalDate, LocalTime>> {
+    val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+
+    val freeSlots = mutableListOf<Pair<LocalDate, LocalTime>>()
+
+    // Determine the date range to check for free slots
+    val currentDate = LocalDate.now()
+    val maxDate = tasks.maxOfOrNull { LocalDate.parse(it.Date, dateFormatter) } ?: currentDate
+    val daysBetween = Duration.between(currentDate.atStartOfDay(), maxDate.atStartOfDay()).toDays().toInt()
+
+    for (dayOffset in 0..daysBetween) {
+        val day = currentDate.plusDays(dayOffset.toLong())
+
+        for (hour in 0..23) {
+            val slotStartTime = LocalTime.of(hour, 0)
+            val slotEndTime = LocalTime.of(hour, 59)
+
+            val tasksForHour = tasks.filter { task ->
+                val taskDate = LocalDate.parse(task.Date, dateFormatter)
+                val taskStartTime = LocalTime.parse(task.TimeStart, timeFormatter)
+                val taskEndTime = LocalTime.parse(task.TimeFinish, timeFormatter)
+                taskDate == day && (taskStartTime.isBefore(slotEndTime) && taskEndTime.isAfter(slotStartTime))
+            }
+
+            if (tasksForHour.isEmpty()) {
+                freeSlots.add(Pair(day, slotStartTime))
+            }
+        }
+    }
+
+    return freeSlots
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -217,7 +263,7 @@ fun TaskCard(task: TaskData) {
             .fillMaxWidth()
             .height((durationHours * 60).dp) // Adjust height based on duration
             .padding(2.dp)
-            .background(color=Color(0xFFeab676)) // Adjust color
+            .background(color = Color(0xFFeab676)) // Adjust color
     ) {
         Column {
             Text(text = task.TaskName, fontWeight = FontWeight.Bold)

@@ -59,7 +59,7 @@ fun MyApp() {
     val userViewModel: UserViewModel = viewModel()
     val apiViewModel: ApiViewModel = ApiViewModel()
 
-    NavHost(navController, startDestination = "login") {
+    NavHost(navController, startDestination = "calendar") {
         composable("home") {
             ViewContainer(navController, apiViewModel )
         }
