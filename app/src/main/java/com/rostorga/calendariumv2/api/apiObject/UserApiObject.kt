@@ -13,9 +13,6 @@ data class UserApiObject(
     @SerializedName("Password")
     @Expose
     val Password: String,
-    @SerializedName("IsLeader")
-    @Expose
-    val isLeader: Boolean,
     @SerializedName("_id")
     @Expose
     val id: String? = null
@@ -28,4 +25,11 @@ data class UserNameApiObject(
     @SerializedName("last")
     @Expose
     val Last: String,
+)
+
+data class UserLogin(
+    @SerializedName("UserName")
+    val username: String,
+    @SerializedName("Password")
+    val password: String
 )

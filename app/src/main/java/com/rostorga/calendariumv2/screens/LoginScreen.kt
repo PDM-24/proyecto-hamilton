@@ -1,12 +1,11 @@
 package com.rostorga.calendariumv2.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,7 +23,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -34,14 +32,12 @@ import com.rostorga.calendariumv2.viewModel.ApiViewModel
 import com.rostorga.calendariumv2.ui.theme.*
 
 @Composable
-fun LoginScreen(navController: NavController) {
-
+fun LoginScreen(navController: NavController, apiViewModel: ApiViewModel = viewModel()) {
     var userName by remember { mutableStateOf(TextFieldValue("")) }
     var password by remember { mutableStateOf(TextFieldValue("")) }
-    val api: ApiViewModel = viewModel()
     val context = LocalContext.current
-
-    val loginResponse by api.loginResponse.observeAsState()
+    val loginResponse by apiViewModel.loginResponse.observeAsState()
+    val currentUserId by apiViewModel.currentUserId.observeAsState()
 
     Column(
         modifier = Modifier
@@ -87,14 +83,18 @@ fun LoginScreen(navController: NavController) {
             verticalArrangement = Arrangement.Center
         ) {
             Button(onClick = {
-                api.loginUser(username=userName.text, password=password.text)
+                apiViewModel.loginUser(username = userName.text, password = password.text)
             }) {
                 Text(text = "Login")
             }
 
             loginResponse?.let { response ->
                 if (response == "Login successful!") {
-                    navController.navigate("home")
+                    Toast.makeText(context, response, Toast.LENGTH_SHORT).show()
+                    currentUserId?.let {
+                        Log.d("LoginScreen", "Logged in User ID: $it")
+                        navController.navigate("home")
+                    }
                 } else {
                     Toast.makeText(context, response, Toast.LENGTH_SHORT).show()
                 }

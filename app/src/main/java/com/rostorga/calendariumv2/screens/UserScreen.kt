@@ -103,8 +103,7 @@ fun UserScreen(navController: NavController,userViewModel: UserViewModel = viewM
                                 name = name.text,
                                 lastName = lastName.text,
                                 Username = username.text,
-                                Password = password.text,
-                                isLeader = isLeader
+                                Password = password.text
                             )
                             userViewModel.addUser(user)
                             Log.d("UserScreen", "User added: $user")
@@ -329,9 +328,7 @@ fun RegisterScreen(navController: NavController, userViewModel: UserViewModel = 
                         name = name.text,
                         lastName = lastName.text,
                         Username = username.text,
-                        Password = password.text,
-                        isLeader = isLeader
-                    )
+                        Password = password.text)
                     userViewModel.addUser(localuser)
                     Log.d("UserScreen", "User added: $localuser")
                 }
@@ -340,8 +337,7 @@ fun RegisterScreen(navController: NavController, userViewModel: UserViewModel = 
                     val user = UserApiObject(
                         Name = UserNameApiObject(name.text, lastName.text),
                         UserName = username.text,
-                        Password = password.text,
-                        isLeader = isLeader
+                        Password = password.text
                     )
                     apiViewModel.postUser(user)
 

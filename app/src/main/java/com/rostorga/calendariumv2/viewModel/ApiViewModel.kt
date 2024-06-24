@@ -34,6 +34,29 @@ class ApiViewModel : ViewModel() {
     private val _loginResponse = MutableLiveData<String>()
     val loginResponse: LiveData<String> get() = _loginResponse
 
+    private val _registeredUserId = MutableLiveData<String?>()
+    val registeredUserId: MutableLiveData<String?> get() = _registeredUserId
+//this is to retrieve the id
+fun registerUser(user: UserApiObject) {
+    val call = ApiClient.apiService.postUser(user)
+    call.enqueue(object : Callback<ResponseBody> {
+        override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    val userObject = convertUser(it)
+                    _registeredUserId.postValue(userObject.id)
+                    Log.d("ApiViewModel", "Registered User ID: ${userObject.id}")
+                }
+            } else {
+                Log.e("ApiViewModel", "Failed to register user: ${response.code()}")
+            }
+        }
+
+        override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+            Log.e("ApiViewModel", "Error registering user", t)
+        }
+    })
+}
     //Converts task json object from api response to our custom TaskApiObject
     fun convertTask(response: ResponseBody): TaskApiObject {
         val json = JSONObject(response.string())
@@ -83,7 +106,7 @@ class ApiViewModel : ViewModel() {
         val call = ApiClient.apiService.getUser(id)
         var returnUser: UserApiObject = UserApiObject(
             UserNameApiObject("request", "failed"),
-            "failure", "", false, ""
+            "failure", "", ""
         )
 
         call.enqueue(object : Callback<ResponseBody> {
@@ -106,8 +129,7 @@ class ApiViewModel : ViewModel() {
         val call = ApiClient.apiService.postUser(requestData)
         var returnUser: UserApiObject = UserApiObject(
             UserNameApiObject("", ""),
-            "", "", false, ""
-        )
+            "", "", "")
 
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {

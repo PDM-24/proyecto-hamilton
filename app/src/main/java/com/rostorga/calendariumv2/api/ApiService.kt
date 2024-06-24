@@ -3,6 +3,7 @@ package com.rostorga.calendariumv2.api
 import com.rostorga.calendariumv2.api.apiObject.TaskApiObject
 import com.rostorga.calendariumv2.api.apiObject.TeamApiObject
 import com.rostorga.calendariumv2.api.apiObject.UserApiObject
+import com.rostorga.calendariumv2.api.apiObject.UserLogin
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.Body
@@ -13,6 +14,8 @@ import retrofit2.http.Path
 
 interface ApiService {
 
+    @POST(value = Constants.API_PATH + Constants.USER_PATH + "user/login")
+    fun loginUser(@Body credentials: UserLogin): Call<ResponseBody>
     //Post User
     @Headers(value = ["Content-Type: application/json"])
     @POST(value = Constants.API_PATH + Constants.USER_PATH + '/')
