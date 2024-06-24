@@ -116,20 +116,22 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
                     Row(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Spacer(modifier = Modifier.width(70.dp)) // Leave space for the hours
+                        Spacer(modifier = Modifier.width(100.dp)) // Leave space for the hours
                         for (i in 0..6) {
                             val day = currentDate.plusDays((weekIndex * 7 + i).toLong())
                             Box(
                                 modifier = Modifier
                                     .width(100.dp)
-                                    .padding(12.dp)
+                                    .clip(shape=RoundedCornerShape(12.dp))
+                                    .padding(2.dp)
                                     .background(Color.LightGray)
                             ) {
                                 Text(
                                     text = day.format(dateFormatter),
                                     modifier = Modifier.align(Alignment.Center),
                                     textAlign = TextAlign.Center,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp
                                 )
                             }
                         }
@@ -144,7 +146,7 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
                         // Hours column
                         Column(
                             modifier = Modifier
-                                .width(80.dp)
+                                .width(100.dp)
                                 .padding(8.dp)
                         ) {
                             for (hour in 0..23) {
@@ -162,7 +164,7 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
                         }
 
                         // Days and tasks grid
-                        for (i in 0..7) {
+                        for (i in 0..6) {
                             val day = currentDate.plusDays((weekIndex * 7 + i).toLong())
                             Column(
                                 modifier = Modifier
@@ -181,7 +183,7 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
 
                                     Box(
                                         modifier = Modifier
-                                            .height(90.dp)
+                                            .height(70.dp)
                                             .width(100.dp)
                                             .background(if (isFreeSlot) Color(0xFFf8ed77) else Color.Transparent)
                                     ) {
@@ -198,14 +200,12 @@ fun CalendarScreen(navController: NavController, userViewModel: UserViewModel = 
         }
     }
     Box(
-        modifier = Modifier.padding(top=700.dp, start = 190.dp)) {
+        modifier = Modifier.padding(top = 700.dp, start = 190.dp)) {
 
         Button(onClick = { highlightOption = 3 }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF8B930))) {
             Text("Free time!", color = Color.Black)
         }
     }
-
-
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -255,13 +255,13 @@ fun TaskCard(task: TaskData) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height((durationHours * 60).dp) // Adjust height based on duration
+            .height((durationMinutes).dp) // Adjust height based on duration
             .padding(1.dp)
-            .clip(shape= RoundedCornerShape(12.dp))
+            .clip(shape = RoundedCornerShape(12.dp))
             .background(color = Color(0xFFeab676)) // Adjust color
     ) {
         Column(
-            modifier=Modifier.align(Alignment.Center),
+            modifier = Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = task.TaskName, fontWeight = FontWeight.Bold, fontSize = 14.sp)
