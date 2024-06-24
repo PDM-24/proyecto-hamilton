@@ -11,10 +11,13 @@ import com.rostorga.calendariumv2.data.database.dao.UserDao
 import com.rostorga.calendariumv2.data.database.entities.TaskData
 import com.rostorga.calendariumv2.data.database.entities.TeamData
 import com.rostorga.calendariumv2.data.database.entities.UserData
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 
-@Database(entities=[TeamData::class, UserData::class, TaskData::class], version=2)
+@Database(entities=[TeamData::class, UserData::class, TaskData::class], version=3)
 abstract class AppDataBase : RoomDatabase() {
+
 
     abstract fun teamDao(): TeamDao
 
@@ -26,7 +29,9 @@ abstract class AppDataBase : RoomDatabase() {
 
     companion object{
         private fun buildDataBase(context: Context): AppDataBase{
-            return  Room.databaseBuilder(context, AppDataBase::class.java, "db").build()
+            return  Room.databaseBuilder(context, AppDataBase::class.java, "db")
+                .fallbackToDestructiveMigration()
+                .build()
         }
         @Volatile
         private var INSTSANCE: AppDataBase?=null

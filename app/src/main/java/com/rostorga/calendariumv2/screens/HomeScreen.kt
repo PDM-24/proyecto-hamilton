@@ -2,6 +2,9 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.os.Build
 import android.view.Menu
+
+import android.util.Log
+
 import android.widget.CalendarView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -49,14 +52,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.navigation.NavController
 import com.rostorga.calendariumv2.screens.num
+import com.rostorga.calendariumv2.viewModel.ApiViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun ViewContainer(navController: NavController) {
+fun ViewContainer(navController: NavController, apiViewModel: ApiViewModel) {
     Scaffold(
         topBar = { ToolBar() },
-        content = { HomeScreenContent(navController) },
+        content = { HomeScreenContent(navController, userViewModel = UserViewModel(Application()) ,apiViewModel) },
         floatingActionButton = { FAB(navController) },
         floatingActionButtonPosition = FabPosition.End
     )
@@ -194,38 +198,34 @@ fun AddTaskPopUp(
                 .background(Color(0xFFFB8478))
                 .padding(8.dp)
                 .width(300.dp)
-                .height(500.dp)
+                .height(480.dp)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = "Add New Task",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = Color.White,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
                 Text("From:")
-                TimeInput(state = timeState1, modifier = Modifier.height(80.dp))
+                TimeInput(state = timeState1, modifier = Modifier.height(75.dp))
                 Text("To:")
-                TimeInput(state = timeState2, modifier = Modifier.height(80.dp))
+                TimeInput(state = timeState2, modifier = Modifier.height(75.dp))
 
-                Spacer(modifier = Modifier.padding(16.dp))
+                Spacer(modifier = Modifier.padding(8.dp))
                 OutlinedTextField(
                     value = task,
                     onValueChange = { task = it },
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(24.dp),
                     placeholder = { Text(text = "Add a title") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .height(56.dp)
                 )
+                Spacer(modifier = Modifier.height(12.dp))
+
                 OutlinedTextField(
                     value = taskDesc,
                     onValueChange = { taskDesc = it },
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(24.dp),
                     placeholder = { Text(text = "Add a description") },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -306,14 +306,21 @@ fun CalendarDialogPopUp(
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenContent(navController: NavController, userViewModel: UserViewModel = viewModel()) {
+fun HomeScreenContent(navController: NavController, userViewModel: UserViewModel = viewModel(), apiViewModel: ApiViewModel) {
     val tasks by userViewModel.allTasks.observeAsState(initial = emptyList())
     var date by remember { mutableStateOf("") }
+    val currentUserId by apiViewModel.currentUserId.observeAsState()
+
 
     var showCreateTeam by remember { mutableStateOf(false) }
 
     if (showCreateTeam) {
-        CreateOrJoinTeam(onDismiss = { showCreateTeam = false }, userViewModel=userViewModel)
+        currentUserId?.let { userId ->
+            CreateOrJoinTeam(userId = userId, onDismiss = { showCreateTeam = false }, userViewModel=userViewModel, apiViewModel)
+        } ?: run {
+            // Handle null user ID: show error message or log out
+            Log.e("HomeScreenContent", "User ID is null. User might not be logged in.")
+        }
     }
 
     val stroke = Stroke(
@@ -398,18 +405,17 @@ fun HomeScreenContent(navController: NavController, userViewModel: UserViewModel
                         .padding(8.dp)
                         .drawBehind {
                             drawRoundRect(
-                                color = Color.Red,
-                                style = stroke,
-                                cornerRadius = CornerRadius(8.dp.toPx())
+                                color = Color(0xFFFC6E60),
+                                cornerRadius = CornerRadius(12.dp.toPx())
                             )
                         },
                     contentAlignment = Alignment.Center
                 ) {
                     Column {
-                        Text(text = "Task: ${task.TaskName}")
-                        Text(text = "Description: ${task.TaskDesc}")
-                        Text(text = "From: ${task.TimeStart} To: ${task.TimeFinish}")
-                        Text(text = "Date: ${task.Date}")
+                        Text(text = "Task: ${task.TaskName}", color= Color.White)
+                        Text(text = "Description: ${task.TaskDesc}", color= Color.White)
+                        Text(text = "From: ${task.TimeStart} To: ${task.TimeFinish}", color= Color.White)
+                        Text(text = "Date: ${task.Date}", color= Color.White)
                     }
                 }
             }

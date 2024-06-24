@@ -21,32 +21,31 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.rostorga.calendariumv2.screens.JoinTeam
 import com.rostorga.calendariumv2.screens.CreateTeam
+import com.rostorga.calendariumv2.viewModel.ApiViewModel
 import com.rostorga.calendariumv2.viewModel.UserViewModel
 
 
 @Composable
 fun CreateOrJoinTeam(
+    userId: String,  // Add this line
     onDismiss:()->Unit,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    apiViewModel: ApiViewModel
 
 ) {
 
     var showJoinTeam by remember { mutableStateOf(false) }
-
     if (showJoinTeam) {
-        JoinTeam(onDismiss = { showJoinTeam = false })
+        JoinTeam(onDismiss = { showJoinTeam = false }, userViewModel = userViewModel)
     }
 
-
-    var showCreateTeam by remember{ mutableStateOf(false)}
-
+    var showCreateTeam by remember { mutableStateOf(false) }
     if (showCreateTeam) {
-        CreateTeam(onDismiss = { showCreateTeam = false }, userViewModel = userViewModel)
-
+        CreateTeam(userId = userId, onDismiss = { showCreateTeam = false }, userViewModel = userViewModel, apiViewModel = apiViewModel)
     }
 
 
-    Dialog(onDismissRequest = { onDismiss() }){
+    Dialog(onDismissRequest = { onDismiss() }) {
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
@@ -66,7 +65,7 @@ fun CreateOrJoinTeam(
                 ) {
                     Text(text = "Want to create a team?", color = Color.White, fontSize = 20.sp)
                     Button(
-                        onClick = { showCreateTeam=true },
+                        onClick = { showCreateTeam = true },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                     ) {
                         Text(text = "Create!", color = Color.Black)
@@ -82,16 +81,14 @@ fun CreateOrJoinTeam(
                 ) {
                     Text(text = "Want to join a team?", color = Color.White, fontSize = 20.sp)
                     Button(
-                        onClick = { showJoinTeam=true },
+                        onClick = { showJoinTeam = true },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                     ) {
                         Text(text = "Join!", color = Color.Black)
                     }
                 }
             }
-
         }
-
     }
 
 }

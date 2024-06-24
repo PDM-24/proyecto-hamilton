@@ -59,9 +59,9 @@ fun MyApp() {
     val userViewModel: UserViewModel = viewModel()
     val apiViewModel: ApiViewModel = ApiViewModel()
 
-    NavHost(navController, startDestination = "login") {
+    NavHost(navController, startDestination = "home") {
         composable("home") {
-            ViewContainer(navController)
+            ViewContainer(navController, apiViewModel )
         }
         composable("login"){
             LoginScreen(navController)
@@ -70,7 +70,10 @@ fun MyApp() {
             CalendarScreenContainer(navController, userViewModel)
         }
         composable("register"){
-            RegisterScreen(navController, apiViewModel)
+            RegisterScreen(navController,userViewModel,apiViewModel)
+        }
+        composable("test"){
+            UserScreen(navController,userViewModel)
         }
     }
 }

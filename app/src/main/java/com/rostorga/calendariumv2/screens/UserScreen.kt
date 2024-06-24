@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 //this is a temp screen to make sure the data is sent and the localDB is setup
 
 @Composable
-fun UserScreen(userViewModel: UserViewModel = viewModel()) {
+fun UserScreen(navController: NavController,userViewModel: UserViewModel = viewModel()) {
     var name by remember { mutableStateOf(TextFieldValue("")) }
     var lastName by remember { mutableStateOf(TextFieldValue("")) }
     var username by remember { mutableStateOf(TextFieldValue("")) }
@@ -103,8 +103,7 @@ fun UserScreen(userViewModel: UserViewModel = viewModel()) {
                                 name = name.text,
                                 lastName = lastName.text,
                                 Username = username.text,
-                                Password = password.text,
-                                isLeader = isLeader
+                                Password = password.text
                             )
                             userViewModel.addUser(user)
                             Log.d("UserScreen", "User added: $user")
@@ -248,6 +247,7 @@ fun UserScreen(userViewModel: UserViewModel = viewModel()) {
                                     TimeFinish = taskTimeFinish.text,
                                     PersonId = user.id
                                 )
+
                                 userViewModel.addTask(task)
                                 Log.d("UserScreen", "Task added: $task")
                             }
@@ -268,7 +268,7 @@ fun UserScreen(userViewModel: UserViewModel = viewModel()) {
 
 
 @Composable
-fun RegisterScreen(navController: NavController, apiViewModel: ApiViewModel = viewModel()) {
+fun RegisterScreen(navController: NavController, userViewModel: UserViewModel = viewModel(), apiViewModel: ApiViewModel = viewModel()) {
     var name by remember { mutableStateOf(TextFieldValue("")) }
     var lastName by remember { mutableStateOf(TextFieldValue("")) }
     var username by remember { mutableStateOf(TextFieldValue("")) }
@@ -322,12 +322,22 @@ fun RegisterScreen(navController: NavController, apiViewModel: ApiViewModel = vi
         }
         Button(
             onClick = {
+
+                scope.launch{
+                    val localuser = UserData(
+                        name = name.text,
+                        lastName = lastName.text,
+                        Username = username.text,
+                        Password = password.text)
+                    userViewModel.addUser(localuser)
+                    Log.d("UserScreen", "User added: $localuser")
+                }
+
                 scope.launch {
                     val user = UserApiObject(
                         Name = UserNameApiObject(name.text, lastName.text),
                         UserName = username.text,
-                        Password = password.text,
-                        isLeader = isLeader
+                        Password = password.text
                     )
                     apiViewModel.postUser(user)
 
