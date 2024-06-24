@@ -139,15 +139,15 @@ fun FAB(navController: NavController, userViewModel: UserViewModel = viewModel()
 @Composable
 fun AddTaskPopUp(
     onDismiss: () -> Unit,
-    onNext: () -> Unit,
+    onNext: ()-> Unit,
     userViewModel: UserViewModel,
     selectedDate: String,
     navController: NavController
 ) {
     var task by remember { mutableStateOf("") }
     var taskDesc by remember { mutableStateOf("") }
-    val timeState1 = rememberTimePickerState(9, 15, false)
-    val timeState2 = rememberTimePickerState(9, 15, false)
+    val timeState1 = rememberTimePickerState(9, 30, false)
+    val timeState2 = rememberTimePickerState(13, 30, false)
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -203,12 +203,14 @@ fun AddTaskPopUp(
 
                 Button(
                     onClick = {
+                        val startTime = String.format("%02d:%02d", timeState1.hour, timeState1.minute)
+                        val endTime = String.format("%02d:%02d", timeState2.hour, timeState2.minute)
                         val taskData = TaskData(
                             TaskName = task,
                             TaskDesc = taskDesc,
                             Date = selectedDate,
-                            TimeStart = "${timeState1.hour}:${timeState1.minute}",
-                            TimeFinish = "${timeState2.hour}:${timeState2.minute}",
+                            TimeStart = startTime,
+                            TimeFinish = endTime,
                             PersonId = 1 // Replace with actual user ID
                         )
 
@@ -235,6 +237,7 @@ fun AddTaskPopUp(
 
 
 
+
 @Composable
 fun CalendarDialogPopUp(
     onDismiss: () -> Unit,
@@ -257,7 +260,7 @@ fun CalendarDialogPopUp(
         text = {
             AndroidView(factory = { CalendarView(it) }, update = {
                 it.setOnDateChangeListener { _, year, month, day ->
-                    date = "$day - ${month + 1} - $year"
+                    date = String.format("%02d/%02d/%04d", day, month + 1, year)
                 }
             })
         }
@@ -355,6 +358,7 @@ fun HomeScreenContent(navController: NavController, userViewModel: UserViewModel
                 Box(
                     Modifier
                         .fillMaxWidth()
+                        .clickable(onClick = { navController.navigate("calendar") })
                         .padding(8.dp)
                         .drawBehind {
                             drawRoundRect(

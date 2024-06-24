@@ -165,7 +165,6 @@ fun profileScreen(onDismiss:()-> Unit,
                             OutlinedTextField(
                                 value = Password,
                                 onValueChange = { Password = it },
-                                visualTransformation = PasswordVisualTransformation(),
                                 modifier = Modifier
                                     .height(65.dp)
                                     .fillMaxWidth()
