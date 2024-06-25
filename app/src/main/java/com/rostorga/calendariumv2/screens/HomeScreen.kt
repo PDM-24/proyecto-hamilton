@@ -51,10 +51,12 @@ import androidx.navigation.NavController
 import com.rostorga.calendariumv2.screens.num
 import com.rostorga.calendariumv2.viewModel.ApiViewModel
 
+
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ViewContainer(navController: NavController, apiViewModel: ApiViewModel) {
+
     Scaffold(
         topBar = { ToolBar(navController) },
         content = { HomeScreenContent(navController, userViewModel = UserViewModel(Application()) ,apiViewModel) },
@@ -66,6 +68,12 @@ fun ViewContainer(navController: NavController, apiViewModel: ApiViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToolBar(navController : NavController) {
+    val currentGlobalValue = remember {
+        num.numero
+    }
+    val countState = remember { mutableStateOf(currentGlobalValue) }
+
+
     val x : Painter
     val imagePainter = painterResource(id = R.drawable.user_circle)
     val imagePainter1 = painterResource(id = R.drawable.angry)
@@ -84,11 +92,8 @@ fun ToolBar(navController : NavController) {
     val imagePainter14 = painterResource(id = R.drawable.sparrow)
     val imagePainter15 = painterResource(id = R.drawable.wolf)
 
-    val h : Int = remember {
-        num.Numero.value
-    }
 
-    when( num.Numero.value){
+    when( countState.value){
         1-> {x = imagePainter1}
         2-> {x = imagePainter2}
         3-> {x = imagePainter3}

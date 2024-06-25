@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,12 +60,18 @@ val images = listOf(
     R.drawable.sparrow,
     R.drawable.wolf,
 )
-
+var y = mutableStateOf(num.numero)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 
 fun MyScreen( navController: NavController,userViewModel: UserViewModel = viewModel()) {
+    val currentGlobalValue = remember {
+        num.numero
+    }
+
+    val countState = remember { mutableStateOf(currentGlobalValue) }
+
     val x : Painter
     val imagePainter = painterResource(id = R.drawable.user_circle)
     val imagePainter1 = painterResource(id = R.drawable.angry)
@@ -84,8 +91,7 @@ fun MyScreen( navController: NavController,userViewModel: UserViewModel = viewMo
     val imagePainter15 = painterResource(id = R.drawable.wolf)
 
 
-
-    when(num.Numero.value){
+    when(y.value){
         1-> {x = imagePainter1}
         2-> {x = imagePainter2}
         3-> {x = imagePainter3}
@@ -143,7 +149,13 @@ fun MyScreen( navController: NavController,userViewModel: UserViewModel = viewMo
             )
         }
 
-        Button(onClick = {num.setNum(0)}) {
+        Button(onClick = {
+           num.setNum(0)
+            val newValue = countState.value - countState.value
+            countState.value = newValue
+            num.numero = newValue
+            y.value=num.nn.value
+        }) {
             Text("quitar  foto ")
         }
 
@@ -159,6 +171,11 @@ fun MyScreen( navController: NavController,userViewModel: UserViewModel = viewMo
 
 @Composable
 fun BoxWithButton(index: Int, image: Int) {
+    val currentGlobalValue = remember {
+        num.numero
+    }
+    val countState = remember { mutableStateOf(currentGlobalValue) }
+
     Card(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
@@ -181,6 +198,13 @@ fun BoxWithButton(index: Int, image: Int) {
             Button(
                 onClick = {
                     num.setNum(index +1)
+
+                    val newValue = index +1
+                    countState.value = newValue
+                    num.numero = newValue
+                    y.value=num.nn.value
+
+
 
                 }
             ) {

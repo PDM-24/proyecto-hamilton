@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -33,6 +34,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.rostorga.calendariumv2.screens.LoginScreen
 import com.rostorga.calendariumv2.screens.MyScreen
+import com.rostorga.calendariumv2.screens.num
 import com.rostorga.calendariumv2.screens.profileScreen
 import com.rostorga.calendariumv2.ui.RegisterScreen
 import com.rostorga.calendariumv2.ui.UserScreen
@@ -45,6 +47,8 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        num.init(this)
         setContent {
             Calendariumv2Theme {
                 MyApp()
