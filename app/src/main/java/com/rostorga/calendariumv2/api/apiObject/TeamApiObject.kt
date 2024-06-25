@@ -13,11 +13,15 @@ data class TeamApiObject(
 
     @SerializedName(value="TeamCode")
     @Expose
-    val code: String,
+    val code: String? = null,
 
     @SerializedName(value="Leader")
     @Expose
     val leader: String,
+
+    @SerializedName(value = "_id")
+    @Expose
+    val id: String? = null
 
 )
 

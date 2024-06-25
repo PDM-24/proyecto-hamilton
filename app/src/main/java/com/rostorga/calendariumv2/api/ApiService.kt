@@ -1,5 +1,6 @@
 package com.rostorga.calendariumv2.api
 
+import com.google.gson.annotations.SerializedName
 import com.rostorga.calendariumv2.api.apiObject.TaskApiObject
 import com.rostorga.calendariumv2.api.apiObject.TeamApiObject
 import com.rostorga.calendariumv2.api.apiObject.UserApiObject
@@ -65,8 +66,30 @@ interface ApiService {
     @POST(value= Constants.API_PATH + Constants.TEAM_PATH+"/joinByCode")
     fun joinTeamByCode(@Body joinRequest: JoinTeamRequest): Call<ResponseBody>
 
+    @Headers(value = ["Content-Type: application/json"])
+    @GET(value = Constants.API_PATH + Constants.TEAM_PATH + "/{id}")
+    fun getTeam(@Path("id") id: String): Call<ResponseBody>
+
+    @Headers(value = ["Content-Type: application/json"])
+    @GET(value = Constants.API_PATH + Constants.TEAM_PATH + "byteam/{id}")
+    fun getTasksForTeam(@Path("id") id: String): Call<ResponseBody>
+
+
+    @GET("generateTeamCode")
+    fun generateTeamCode(): Call<TeamResponse>
+
+
+    data class TeamResponse(val message: String, val data: TeamData) {
+    }
+
+
+    data class TeamData(val teamName: String, val teamCode: String, val leaderId: String)
+
+
     data class JoinTeamRequest(
+        @SerializedName("userId")
         val userId: String,
+        @SerializedName("teamCode")
         val teamCode: String
     )
 

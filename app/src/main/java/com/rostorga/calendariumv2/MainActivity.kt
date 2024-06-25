@@ -26,6 +26,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.rostorga.calendariumv2.screens.LoginScreen
+import com.rostorga.calendariumv2.screens.TeamViewContainer
 import com.rostorga.calendariumv2.ui.RegisterScreen
 import com.rostorga.calendariumv2.ui.UserScreen
 import com.rostorga.calendariumv2.ui.theme.Calendariumv2Theme
@@ -69,6 +70,12 @@ fun MyApp() {
         composable("test"){
             UserScreen(navController,userViewModel)
         }
+        composable("teamHomeScreen"){
+            TeamViewContainer(navController, apiViewModel)
+        }
+        composable("teamCalendarScreen") {
+            TeamCalendarScreenContainer(navController, userViewModel)
+        }
     }
 }
 
@@ -77,6 +84,29 @@ fun MyApp() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CalendarScreenContainer(navController: NavHostController, userViewModel: UserViewModel) {
+    Scaffold(
+        topBar={
+            TopAppBar(title = {
+                Text(text="Calendar")
+            },
+                navigationIcon = { IconButton(onClick = {navController.popBackStack() }) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                }}
+            )
+        },
+        content = {
+            CalendarScreen(navController = navController, userViewModel = userViewModel)
+        },
+        floatingActionButton = { CalendarFAB() },
+        floatingActionButtonPosition = FabPosition.End
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun TeamCalendarScreenContainer(navController: NavHostController, userViewModel: UserViewModel) {
     Scaffold(
         topBar={
             TopAppBar(title = {

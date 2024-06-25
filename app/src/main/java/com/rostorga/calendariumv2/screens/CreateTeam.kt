@@ -24,6 +24,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.rostorga.calendariumv2.api.ApiClient
+import com.rostorga.calendariumv2.api.ApiService
 import com.rostorga.calendariumv2.api.apiObject.TeamApiObject
 import com.rostorga.calendariumv2.data.database.entities.TeamData
 import com.rostorga.calendariumv2.objects.UserManager
@@ -33,21 +36,25 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 
-fun generateRandomCode(): String = List(6) { Random.nextInt(0, 10) }.joinToString("")
 
-@SuppressLint("RememberReturnType")@Composable
+@SuppressLint("RememberReturnType")
+@Composable
 fun CreateTeam(
     onDismiss: () -> Unit,
-    apiViewModel: ApiViewModel = viewModel()
+    apiViewModel: ApiViewModel = viewModel(),
+    navController: NavController
 ) {
     var teamName by remember { mutableStateOf(TextFieldValue("")) }
-    val teamCode = remember { generateRandomCode() }  // Auto-generated team code
+    var teamCode by remember { mutableStateOf("") } // Now this will update based on LiveData changes
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     // Retrieve the user ID from UserManager
     val userId = UserManager.getUser()
+
+
+
 
     Dialog(onDismissRequest = { onDismiss() }) {
         Box(
@@ -71,22 +78,24 @@ fun CreateTeam(
                     label = { Text("Team Name") },
                     placeholder = { Text(text = " Ex: Best Team Ever! ", color = Color.White) }
                 )
-                Text("Team Code: $teamCode")  // Display auto-generated code
+                if (teamCode.isNotEmpty()) {
+                    Text("Team Code: $teamCode")  // Display fetched code
+                }
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Button(
                     onClick = {
-                        if (userId != null && teamName.text.isNotEmpty()) {
-                            scope.launch {
+                        Log.d("CreateTeam", "Team Name: ${teamName.text}, Team Code: $teamCode")
+
+                        if (teamName.text.isNotEmpty()) {
                                 val team = TeamApiObject(
                                     name = teamName.text,
-                                    code = teamCode,
-                                    leader = userId
-                                )
-                                apiViewModel.postTeam(team)
-                            }
+                                    leader = UserManager.getUser() ?: "")
+                                ApiViewModel().postTeam(team)
+
+                            navController.navigate("teamHomeScreen")
                         } else {
-                            Toast.makeText(context, "Please ensure you are logged in and all fields are filled.", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, "Please ensure all fields are filled.", Toast.LENGTH_LONG).show()
                         }
                     },
                     modifier = Modifier.width(200.dp)

@@ -6,6 +6,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
+import com.rostorga.calendariumv2.api.ApiClient
+import com.rostorga.calendariumv2.api.apiObject.TaskApiObject
 import com.rostorga.calendariumv2.data.database.AppDataBase
 import com.rostorga.calendariumv2.data.database.entities.TaskData
 import com.rostorga.calendariumv2.data.database.entities.TeamData
@@ -15,6 +19,11 @@ import com.rostorga.calendariumv2.data.database.repository.UserRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.ResponseBody
+import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class UserViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -34,6 +43,9 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     val allTasks: LiveData<List<TaskData>>
 
     val usersWithTeams: LiveData<List<UserWithTeams>> get() = _usersWithTeams
+
+    private val _TasksFromTeams = MutableLiveData<List<TaskData>>()
+    val TaskFromTeams:  MutableLiveData<List<TaskData>> get() = _TasksFromTeams
 
     init {
         val userDao = AppDataBase.getDataBaseInstance(application).UserDao()
@@ -86,5 +98,45 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                 Log.e("UserViewModel", "Error joining team", e)
             }
         }
+    }
+
+
+    val gson = GsonBuilder().create()
+    fun getRemoteTeamTasks(id: String) {
+        val call = ApiClient.apiService.getTasksForTeam(id)
+
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                response.body()?.let {
+                    val json = JSONObject(it.string())
+                    val body = json.getString("data")
+
+                    val typeToken = object : TypeToken<List<TaskApiObject>>() {}.type
+                    val taskObject = gson.fromJson<List<TaskApiObject>>(body, typeToken)
+                    val localTaskList: MutableList<TaskData> = mutableListOf()
+
+                    Log.i("apiviewmodel", taskObject.toString())
+
+                    taskObject.forEach { item ->
+                        val temp = convertTaskAPi(item)
+                        localTaskList.add(temp)
+                     }
+
+                    TaskFromTeams.postValue(localTaskList.toList())
+
+
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Log.i("apiviewmodel", t.message.toString())
+            }
+        })
+
+    }
+
+    fun convertTaskAPi(temp: TaskApiObject): TaskData{
+        return TaskData(TaskName = temp.name, TaskDesc = temp.description, Date = temp.date, TimeStart =  temp.timeStart,
+           TimeFinish =  temp.timeEnd, PersonId =  1)
     }
 }
