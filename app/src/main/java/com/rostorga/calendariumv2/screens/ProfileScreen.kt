@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,7 +52,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.rostorga.calendariumv2.R
+import com.rostorga.calendariumv2.viewModel.UserViewModel
 
 //IMPORTANT
 /*
@@ -68,8 +72,10 @@ import com.rostorga.calendariumv2.R
 @Composable
 fun profileScreen(onDismiss:()-> Unit,
                   image: Painter,
-                  imageSize: Dp = 100.dp,
-                  circleSize: Dp = 120.dp) {
+                //  navController: NavController
+
+
+) {
     var username by remember { mutableStateOf(" ") }
     var email by remember { mutableStateOf(" ") }
     var teamName by remember { mutableStateOf(" ") }
@@ -80,7 +86,7 @@ fun profileScreen(onDismiss:()-> Unit,
 
 
 
-    Dialog(onDismissRequest = { onDismiss() },
+    Dialog(onDismissRequest = { onDismiss() }
 
         ){
         Box(
@@ -205,31 +211,6 @@ fun profileScreen(onDismiss:()-> Unit,
                     modifier = Modifier.size(125.dp)
                 )
             }
-
-            //inside this box there should be an icon like the figma that is clickable and will open up another DIALOG
-            //NOT ALERTDIALOG NORMAL DIALOG and it should open up the images to change the profile pic
-
-            Box(
-                modifier = Modifier
-                    .size(45.dp)
-                    .offset(y = -260.dp, x = 50.dp)
-                    .clip(CircleShape)
-                    .background(color = Color.Gray)
-                    .align(Alignment.Center)
-
-
-            ){
-                Icon(imageVector = Icons.Default.Edit , contentDescription = null,
-                    modifier = Modifier
-                        .size(45.dp)
-                )
-
-            }
-
-
-
-
-
 
         }
 
