@@ -30,7 +30,6 @@ import com.rostorga.calendariumv2.screens.LoginScreen
 import com.rostorga.calendariumv2.screens.MyScreen
 import com.rostorga.calendariumv2.screens.num
 import com.rostorga.calendariumv2.screens.profileScreen
-import com.rostorga.calendariumv2.screens.TeamViewContainer
 import com.rostorga.calendariumv2.ui.RegisterScreen
 import com.rostorga.calendariumv2.ui.UserScreen
 import com.rostorga.calendariumv2.ui.theme.Calendariumv2Theme
