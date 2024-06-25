@@ -1,10 +1,7 @@
 import android.annotation.SuppressLint
 import android.app.Application
 import android.os.Build
-import android.view.Menu
-
 import android.util.Log
-
 import android.widget.CalendarView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -18,7 +15,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -130,9 +126,18 @@ fun ToolBar() {
             Image(painter = painterResource(id = R.drawable.menuicon), contentDescription = null, modifier = Modifier
                 .size(50.dp).clickable {  })
 
-            Image(painter = painterResource(id = R.drawable.user), contentDescription = null, modifier = Modifier
-                .size(36.dp)
-                .clickable { showProfile = true })
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(CircleShape).clickable { showProfile = true }
+            ){
+
+                Image(
+                    painter = x,
+                    contentDescription = null,
+                    modifier = Modifier.size(125.dp)
+                )
+            }
         }
     })
 }

@@ -2,9 +2,11 @@ package com.rostorga.calendariumv2.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,9 +16,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +54,7 @@ val images = listOf(
 )
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyScreen() {
     val imagePainter = painterResource(id = R.drawable.user_circle)
@@ -66,6 +74,21 @@ fun MyScreen() {
     val imagePainter14 = painterResource(id = R.drawable.sparrow)
     val imagePainter15 = painterResource(id = R.drawable.wolf)
 
+    TopAppBar(title = {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.ArrowBack, contentDescription = null, modifier = Modifier
+                    .size(50.dp).clickable { })
+
+        }
+    })
     Column(
         modifier = Modifier.padding(16.dp)
     ) {
@@ -89,9 +112,14 @@ fun MyScreen() {
         }
 
         Text(
-            text = "imagen: ${num.Numero.value  }",
-            modifier = Modifier.padding(bottom = 16.dp).align(Alignment.CenterHorizontally)
+            text = "Selecciona Imagen de Perfil",
+            modifier = Modifier
+                .padding(bottom = 16.dp)
+                .align(Alignment.CenterHorizontally)
         )
+        Button(onClick = {num.setNum(0)}) {
+            Text("quitar  foto ")
+        }
 
         LazyColumn {
             itemsIndexed(images) { index, image ->
@@ -149,7 +177,8 @@ fun CircleWithImage(
         Image(
             painter = image,
             contentDescription = null,
-            modifier = Modifier.size(imageSize)
+            modifier = Modifier
+                .size(imageSize)
         )
     }
 }
