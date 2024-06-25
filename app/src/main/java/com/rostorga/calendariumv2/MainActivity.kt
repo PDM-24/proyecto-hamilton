@@ -80,13 +80,6 @@ fun MyApp() {
             MyScreen(navController)
         }
 
-
-        composable("teamHomeScreen"){
-            TeamViewContainer(navController, apiViewModel)
-        }
-        composable("teamCalendarScreen") {
-            TeamCalendarScreenContainer(navController, userViewModel)
-        }
     }
 }
 
