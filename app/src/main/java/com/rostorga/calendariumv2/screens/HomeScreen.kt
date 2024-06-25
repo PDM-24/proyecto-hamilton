@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -55,7 +56,7 @@ import com.rostorga.calendariumv2.viewModel.ApiViewModel
 @Composable
 fun ViewContainer(navController: NavController, apiViewModel: ApiViewModel) {
     Scaffold(
-        topBar = { ToolBar() },
+        topBar = { ToolBar(navController) },
         content = { HomeScreenContent(navController, userViewModel = UserViewModel(Application()) ,apiViewModel) },
         floatingActionButton = { FAB(navController) },
         floatingActionButtonPosition = FabPosition.End
@@ -64,7 +65,7 @@ fun ViewContainer(navController: NavController, apiViewModel: ApiViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ToolBar() {
+fun ToolBar(navController : NavController) {
     val x : Painter
     val imagePainter = painterResource(id = R.drawable.user_circle)
     val imagePainter1 = painterResource(id = R.drawable.angry)
@@ -82,6 +83,10 @@ fun ToolBar() {
     val imagePainter13 = painterResource(id = R.drawable.rhinoceros)
     val imagePainter14 = painterResource(id = R.drawable.sparrow)
     val imagePainter15 = painterResource(id = R.drawable.wolf)
+
+    val h : Int = remember {
+        num.Numero.value
+    }
 
     when( num.Numero.value){
         1-> {x = imagePainter1}
@@ -124,12 +129,19 @@ fun ToolBar() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(painter = painterResource(id = R.drawable.menuicon), contentDescription = null, modifier = Modifier
-                .size(50.dp).clickable {  })
+                .size(50.dp)
+                .clickable { })
+
+            Icon(imageVector = Icons.Default.Edit, contentDescription = null,modifier = Modifier
+                .size(30.dp)
+                .offset(x = 90.dp)
+                .clickable { navController.navigate("photo") })
 
             Box(
                 modifier = Modifier
                     .size(50.dp)
-                    .clip(CircleShape).clickable { showProfile = true }
+                    .clip(CircleShape)
+                    .clickable { showProfile = true }
             ){
 
                 Image(

@@ -32,6 +32,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.rostorga.calendariumv2.screens.LoginScreen
+import com.rostorga.calendariumv2.screens.MyScreen
+import com.rostorga.calendariumv2.screens.profileScreen
 import com.rostorga.calendariumv2.ui.RegisterScreen
 import com.rostorga.calendariumv2.ui.UserScreen
 import com.rostorga.calendariumv2.ui.theme.Calendariumv2Theme
@@ -75,6 +77,13 @@ fun MyApp() {
         composable("test"){
             UserScreen(navController,userViewModel)
         }
+        composable("photo"){
+            MyScreen(navController)
+        }
+
+
+
+
     }
 }
 
