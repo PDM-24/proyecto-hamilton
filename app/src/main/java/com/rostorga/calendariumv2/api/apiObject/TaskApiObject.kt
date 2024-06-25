@@ -13,21 +13,17 @@ data class TaskApiObject(
     @SerializedName(value = "Description")
     val description: String,
 
-    @SerializedName(value = "Day")
+    @SerializedName(value = "Date")
     @Expose
-    val day: Int,
+    val date: String,
 
-    @SerializedName(value = "Month")
+    @SerializedName(value = "TimeStart")
     @Expose
-    val month: Int,
+    val timeStart: String,
 
-    @SerializedName(value = "Year")
+    @SerializedName(value = "TimeEnd")
     @Expose
-    val year: Int,
-
-    @SerializedName(value = "Time")
-    @Expose
-    var time: TaskDurationObject,
+    val timeEnd: String,
 
     @SerializedName(value = "UserRef")
     @Expose

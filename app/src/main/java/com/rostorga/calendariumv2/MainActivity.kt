@@ -3,7 +3,6 @@ package com.rostorga.calendariumv2
 
 import CalendarFAB
 import CalendarScreen
-import CalendarScreenContainer
 import ViewContainer
 import android.annotation.SuppressLint
 import android.os.Build
@@ -12,21 +11,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -36,6 +30,7 @@ import com.rostorga.calendariumv2.screens.LoginScreen
 import com.rostorga.calendariumv2.screens.MyScreen
 import com.rostorga.calendariumv2.screens.num
 import com.rostorga.calendariumv2.screens.profileScreen
+import com.rostorga.calendariumv2.screens.TeamViewContainer
 import com.rostorga.calendariumv2.ui.RegisterScreen
 import com.rostorga.calendariumv2.ui.UserScreen
 import com.rostorga.calendariumv2.ui.theme.Calendariumv2Theme
@@ -65,7 +60,7 @@ fun MyApp() {
     val userViewModel: UserViewModel = viewModel()
     val apiViewModel: ApiViewModel = ApiViewModel()
 
-    NavHost(navController, startDestination = "home") {
+    NavHost(navController, startDestination = "login") {
         composable("home") {
             ViewContainer(navController, apiViewModel )
         }
@@ -86,8 +81,12 @@ fun MyApp() {
         }
 
 
-
-
+        composable("teamHomeScreen"){
+            TeamViewContainer(navController, apiViewModel)
+        }
+        composable("teamCalendarScreen") {
+            TeamCalendarScreenContainer(navController, userViewModel)
+        }
     }
 }
 
@@ -96,6 +95,29 @@ fun MyApp() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CalendarScreenContainer(navController: NavHostController, userViewModel: UserViewModel) {
+    Scaffold(
+        topBar={
+            TopAppBar(title = {
+                Text(text="Calendar")
+            },
+                navigationIcon = { IconButton(onClick = {navController.popBackStack() }) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                }}
+            )
+        },
+        content = {
+            CalendarScreen(navController = navController, userViewModel = userViewModel)
+        },
+        floatingActionButton = { CalendarFAB() },
+        floatingActionButtonPosition = FabPosition.End
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun TeamCalendarScreenContainer(navController: NavHostController, userViewModel: UserViewModel) {
     Scaffold(
         topBar={
             TopAppBar(title = {

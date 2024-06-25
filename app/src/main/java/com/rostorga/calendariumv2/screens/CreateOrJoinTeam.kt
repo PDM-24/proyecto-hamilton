@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavController
 import com.rostorga.calendariumv2.screens.JoinTeam
 import com.rostorga.calendariumv2.screens.CreateTeam
 import com.rostorga.calendariumv2.viewModel.ApiViewModel
@@ -27,21 +28,20 @@ import com.rostorga.calendariumv2.viewModel.UserViewModel
 
 @Composable
 fun CreateOrJoinTeam(
-    userId: String,  // Add this line
     onDismiss:()->Unit,
     userViewModel: UserViewModel,
-    apiViewModel: ApiViewModel
-
+    apiViewModel: ApiViewModel,
+    navController: NavController
 ) {
 
     var showJoinTeam by remember { mutableStateOf(false) }
     if (showJoinTeam) {
-        JoinTeam(onDismiss = { showJoinTeam = false }, userViewModel = userViewModel)
+        JoinTeam(onDismiss = { showJoinTeam = false }, userViewModel = userViewModel, apiViewModel = apiViewModel)
     }
 
     var showCreateTeam by remember { mutableStateOf(false) }
     if (showCreateTeam) {
-        CreateTeam(userId = userId, onDismiss = { showCreateTeam = false }, userViewModel = userViewModel, apiViewModel = apiViewModel)
+        CreateTeam(onDismiss = { showCreateTeam = false }, apiViewModel = apiViewModel, navController)
     }
 
 

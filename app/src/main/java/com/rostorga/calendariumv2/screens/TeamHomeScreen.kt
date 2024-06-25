@@ -1,7 +1,10 @@
+package com.rostorga.calendariumv2.screens
+
 import android.annotation.SuppressLint
 import android.app.Application
 import android.os.Build
 import android.util.Log
+
 import android.widget.CalendarView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -15,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -33,14 +35,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import com.rostorga.calendariumv2.R
-import com.rostorga.calendariumv2.screens.profileScreen
-import com.rostorga.calendariumv2.screens.CreateOrJoinTeam
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rostorga.calendariumv2.viewModel.UserViewModel
 import com.rostorga.calendariumv2.data.database.entities.TaskData
@@ -50,19 +49,17 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.navigation.NavController
 import com.rostorga.calendariumv2.api.apiObject.TaskApiObject
 import com.rostorga.calendariumv2.api.apiObject.TaskDurationObject
+import com.rostorga.calendariumv2.objects.TeamManager
 import com.rostorga.calendariumv2.objects.UserManager
-import com.rostorga.calendariumv2.screens.num
 import com.rostorga.calendariumv2.viewModel.ApiViewModel
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun ViewContainer(navController: NavController, apiViewModel: ApiViewModel) {
-
+fun TeamViewContainer(navController: NavController, apiViewModel: ApiViewModel) {
     Scaffold(
-        topBar = { ToolBar(navController) },
-        content = { HomeScreenContent(navController, userViewModel = UserViewModel(Application()) ,apiViewModel) },
+        topBar = { ToolBar() },
+        content = { TeamHomeScreenContent(navController, userViewModel = UserViewModel(Application()) ,apiViewModel) },
         floatingActionButton = { FAB(navController) },
         floatingActionButtonPosition = FabPosition.End
     )
@@ -70,13 +67,7 @@ fun ViewContainer(navController: NavController, apiViewModel: ApiViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ToolBar(navController : NavController) {
-    val currentGlobalValue = remember {
-        num.numero
-    }
-    val countState = remember { mutableStateOf(currentGlobalValue) }
-
-
+fun ToolBar() {
     val x : Painter
     val imagePainter = painterResource(id = R.drawable.user_circle)
     val imagePainter1 = painterResource(id = R.drawable.angry)
@@ -95,8 +86,7 @@ fun ToolBar(navController : NavController) {
     val imagePainter14 = painterResource(id = R.drawable.sparrow)
     val imagePainter15 = painterResource(id = R.drawable.wolf)
 
-
-    when( countState.value){
+    when( num.Numero.value){
         1-> {x = imagePainter1}
         2-> {x = imagePainter2}
         3-> {x = imagePainter3}
@@ -140,24 +130,9 @@ fun ToolBar(navController : NavController) {
                 .size(50.dp)
                 .clickable { })
 
-            Icon(imageVector = Icons.Default.Edit, contentDescription = null,modifier = Modifier
-                .size(30.dp)
-                .offset(x = 90.dp)
-                .clickable { navController.navigate("photo") })
-
-            Box(
-                modifier = Modifier
-                    .size(50.dp)
-                    .clip(CircleShape)
-                    .clickable { showProfile = true }
-            ){
-
-                Image(
-                    painter = x,
-                    contentDescription = null,
-                    modifier = Modifier.size(125.dp)
-                )
-            }
+            Image(painter = painterResource(id = R.drawable.user), contentDescription = null, modifier = Modifier
+                .size(36.dp)
+                .clickable { showProfile = true })
         }
     })
 }
@@ -291,10 +266,12 @@ fun AddTaskPopUp(
                                 timeStart = startTime,
                                 timeEnd = endTime,
                                 userRef=userId.toString(),
+                                team = TeamManager.getTeamId()
                             )
                             apiViewModel.postTask(taskApiObject)
 
                         }
+
 
                         navController.navigate("calendar")
 
@@ -345,18 +322,15 @@ fun CalendarDialogPopUp(
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenContent(navController: NavController, userViewModel: UserViewModel = viewModel(), apiViewModel: ApiViewModel) {
+fun TeamHomeScreenContent(navController: NavController, userViewModel: UserViewModel = viewModel(), apiViewModel: ApiViewModel) {
     val tasks by userViewModel.allTasks.observeAsState(initial = emptyList())
     var date by remember { mutableStateOf("") }
     val currentUserId by apiViewModel.currentUserId.observeAsState()
 
-    var showCreateTeam by remember { mutableStateOf(false) }
+    val currentTeamCode by ApiViewModel().currentTeamCode.collectAsState()
+    Log.i("your", TeamManager.getTeam().toString())
 
-    if (showCreateTeam) {
-            CreateOrJoinTeam( onDismiss = { showCreateTeam = false }, userViewModel=userViewModel, apiViewModel, navController)
-    }
 
     val stroke = Stroke(
         width = 2f,
@@ -396,17 +370,15 @@ fun HomeScreenContent(navController: NavController, userViewModel: UserViewModel
                 Modifier
                     .size(180.dp, 60.dp)
                     .padding(8.dp)
-                    .clickable { showCreateTeam = true }
                     .drawBehind {
                         drawRoundRect(
                             color = Color(0xFFBA74A8),
-                            style = stroke,
                             cornerRadius = CornerRadius(10.dp.toPx())
                         )
                     },
                 contentAlignment = Alignment.Center
             ) {
-                Text(textAlign = TextAlign.Center, text = "Create or join a team!")
+                Text(textAlign = TextAlign.Center, text =  "Code: " + TeamManager.getTeam().toString())
             }
         }
 

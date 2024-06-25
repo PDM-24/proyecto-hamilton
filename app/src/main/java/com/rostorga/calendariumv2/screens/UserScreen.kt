@@ -1,6 +1,7 @@
 package com.rostorga.calendariumv2.ui
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.LocalAbsoluteTonalElevation
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
@@ -15,6 +17,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -275,6 +278,7 @@ fun RegisterScreen(navController: NavController, userViewModel: UserViewModel = 
     var password by remember { mutableStateOf(TextFieldValue("")) }
     var email by remember { mutableStateOf(TextFieldValue("")) }
     var isLeader by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     val scope = rememberCoroutineScope()
     val registrationResponse by apiViewModel.loginResponse.observeAsState()
@@ -310,16 +314,6 @@ fun RegisterScreen(navController: NavController, userViewModel: UserViewModel = 
             label = { Text("Password") },
             modifier = Modifier.fillMaxWidth().padding(12.dp)
         )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = isLeader,
-                onCheckedChange = { isLeader = it }
-            )
-            Text(text = "Is Leader", color = Color.White)
-        }
         Button(
             onClick = {
 
@@ -340,6 +334,7 @@ fun RegisterScreen(navController: NavController, userViewModel: UserViewModel = 
                         Password = password.text
                     )
                     apiViewModel.postUser(user)
+                    Toast.makeText(context, "user registered succesfully!", Toast.LENGTH_SHORT).show()
 
                 }
             },

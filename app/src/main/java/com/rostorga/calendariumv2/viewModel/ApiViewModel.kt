@@ -12,14 +12,18 @@ import retrofit2.Response
 import okhttp3.ResponseBody
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import com.rostorga.calendariumv2.api.ApiService
 import com.rostorga.calendariumv2.api.apiObject.TaskApiObject
 import com.rostorga.calendariumv2.api.apiObject.TaskDurationObject
 import com.rostorga.calendariumv2.api.apiObject.TeamApiObject
 import com.rostorga.calendariumv2.api.apiObject.UserLogin
 import com.rostorga.calendariumv2.api.apiObject.UserNameApiObject
-import okhttp3.*
+import com.rostorga.calendariumv2.objects.TeamManager
+import com.rostorga.calendariumv2.objects.UserManager
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONObject
-import java.io.IOException
 
 class ApiViewModel : ViewModel() {
 
@@ -31,8 +35,12 @@ class ApiViewModel : ViewModel() {
     val loginResponse = MutableLiveData<String>()
     val currentUserId = MutableLiveData<String>()
 
+    private val _currentTeamCode = MutableStateFlow<TeamApiObject?>(null)
+    val currentTeamCode: StateFlow<TeamApiObject?> get() = _currentTeamCode.asStateFlow()
+
     private val _registeredUserId = MutableLiveData<String?>()
     val registeredUserId: MutableLiveData<String?> get() = _registeredUserId
+
 
     //this is to retrieve the id
     fun registerUser(user: UserApiObject) {
@@ -60,13 +68,10 @@ class ApiViewModel : ViewModel() {
     fun convertTask(response: ResponseBody): TaskApiObject {
         val json = JSONObject(response.string())
         val body = json.getString("data")
-        val time = JSONObject(body).getString("Time")
 
         val taskObject = gson.fromJson(body, TaskApiObject::class.java)
-        taskObject.time = gson.fromJson(time, TaskDurationObject::class.java)
 
         Log.i("apiviewmodel", body)
-        Log.i("apiviewmodel", time)
         Log.i("apiviewmodel", taskObject.toString())
 
         return taskObject
@@ -127,14 +132,13 @@ class ApiViewModel : ViewModel() {
     fun postUser(requestData: UserApiObject): UserApiObject {
         val call = ApiClient.apiService.postUser(requestData)
         var returnUser: UserApiObject = UserApiObject(
-            UserNameApiObject("", ""),
-            "", "", ""
-        )
+            UserNameApiObject("", ""), "", "", "")
 
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 response.body()?.let {
                     returnUser = convertUser(it)
+                    _registeredUserId.value = returnUser.id
                 }
             }
 
@@ -153,9 +157,12 @@ class ApiViewModel : ViewModel() {
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 response.body()?.let {
-                    result.value = convertTeam(it)
-                } ?: run {
-                    result.value = null
+                    val teamObject = convertTeam(it)
+                    _currentTeamCode.value = teamObject
+
+                    TeamManager.setTeam(teamObject.code.toString())
+                    TeamManager.setTeamId(teamObject.id.toString())
+
                 }
             }
 
@@ -168,13 +175,9 @@ class ApiViewModel : ViewModel() {
         return result
     }
 
-    fun postTask(requestData: TaskApiObject, teamId: String): TaskApiObject {
-        requestData.team = teamId
+    fun postTask(requestData: TaskApiObject): TaskApiObject {
         val call = ApiClient.apiService.postTask(requestData)
-        var returnTask: TaskApiObject = TaskApiObject(
-            "", "", 1, 1, 1,
-            TaskDurationObject(1223, 1440), ""
-        )
+        var returnTask: TaskApiObject = TaskApiObject("", "","", "","","","")
 
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
@@ -215,27 +218,27 @@ class ApiViewModel : ViewModel() {
     }
 
     fun getTasksFromUser(id: String, teamId: String) {
-        val call = ApiClient.apiService.getTasksFromUser(id, teamId)
+            val call = ApiClient.apiService.getTasksFromUser(id, teamId)
 
-        call.enqueue(object : Callback<ResponseBody> {
-            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                response.body()?.let {
-                    val json = JSONObject(it.string())
-                    val body = json.getString("data")
+            call.enqueue(object : Callback<ResponseBody> {
+                override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                    response.body()?.let {
+                        val json = JSONObject(it.string())
+                        val body = json.getString("data")
 
-                    val typeToken = object : TypeToken<List<TaskApiObject>>() {}.type
-                    val taskObject = gson.fromJson<List<TaskApiObject>>(body, typeToken)
+                        val typeToken = object : TypeToken<List<TaskApiObject>>() {}.type
+                        val taskObject = gson.fromJson<List<TaskApiObject>>(body, typeToken)
 
-                    Log.i("apiviewmodel", taskObject.toString())
+                        Log.i("apiviewmodel", taskObject.toString())
 
-                    _taskList.value = taskObject
+                        _taskList.value = taskObject
+                    }
                 }
-            }
 
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                Log.i("apiviewmodel", t.message.toString())
-            }
-        })
+                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                    Log.i("apiviewmodel", t.message.toString())
+                }
+            })
     }
 
 
@@ -254,7 +257,11 @@ class ApiViewModel : ViewModel() {
                                 val userId = userData.optString("_id", "N/A")
                                 if (userId != "N/A") {
                                     currentUserId.postValue(userId)
-                                    loginResponse.postValue("Login successful! User ID: $userId")
+                                    UserManager.setUser(userId)
+                                    //loginResponse.postValue("Login successful! User ID: $userId")
+                                    loginResponse.postValue("Login successful!")
+                                    Log.d("ApiViewModel", "Logged in User ID: $userId")
+
                                 } else {
                                     loginResponse.postValue("Login failed: User ID not found in response")
                                     Log.e("ApiViewModel", "User ID not found in JSON response")
@@ -284,7 +291,68 @@ class ApiViewModel : ViewModel() {
             }
         })
     }
+    //join team
+    fun apiJoinTeam(userId: String, teamCode: String) {
+        val joinRequest = ApiService.JoinTeamRequest(userId, teamCode)
+        val call = ApiClient.apiService.joinTeamByCode(joinRequest)
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                if (response.isSuccessful) {
+                    Log.d("jointeam", response.body().toString())
 
+                    // Handle success, maybe update UI or state
+                } else {
+                    val errorMessage = response.errorBody()?.string() ?: "Failed to join team"
+                    Log.d("jointeam", errorMessage)
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                // Handle network errors or other unexpected errors
+            }
+        })
+    }
+    fun fetchUniqueTeamCode(): MutableLiveData<String?> {
+        val result = MutableLiveData<String?>()
+        ApiClient.apiService.generateTeamCode().enqueue(object : Callback<ApiService.TeamResponse> {
+            override fun onResponse(call: Call<ApiService.TeamResponse>, response: Response<ApiService.TeamResponse>) {
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        result.postValue(it.toString()) // Assuming 'teamCode' is the property you need
+                    } ?: run {
+                        Log.e("ApiViewModel", "No code received in response")
+                        result.value = null
+                    }
+                } else {
+                    Log.e("ApiViewModel", "Error fetching unique code: ${response.errorBody()?.string()}")
+                    result.value = null
+                }
+            }
+
+            override fun onFailure(call: Call<ApiService.TeamResponse>, t: Throwable) {
+                Log.e("ApiViewModel", "Network error when fetching code", t)
+                result.value = null
+            }
+        })
+        return result
+    }
+
+    fun getTeam(id: String) {
+        val call = ApiClient.apiService.getTeam(id)
+
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                response.body()?.let {
+                    _currentTeamCode.value = convertTeam(it)
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Log.i("apiviewmodel", t.message.toString())
+            }
+        })
+
+    }
 
 }
 

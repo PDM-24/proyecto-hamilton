@@ -2,28 +2,6 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="CalendarScreen">
-        <State />
-      </entry>
-      <entry key="CalendarScreenContainer">
-        <State />
-      </entry>
-      <entry key="ViewContainer">
-        <State>
-          <targetSelectedWithDropDown>
-            <Target>
-              <type value="QUICK_BOOT_TARGET" />
-              <deviceKey>
-                <Key>
-                  <type value="VIRTUAL_DEVICE_PATH" />
-                  <value value="C:\Users\jrovo\.android\avd\Pixel_3a_API_34_extension_level_7_x86_64.avd" />
-                </Key>
-              </deviceKey>
-            </Target>
-          </targetSelectedWithDropDown>
-          <timeTargetWasSelectedWithDropDown value="2024-06-03T03:41:47.027699300Z" />
-        </State>
-      </entry>
       <entry key="app">
         <State>
           <targetSelectedWithDropDown>
@@ -37,11 +15,8 @@
               </deviceKey>
             </Target>
           </targetSelectedWithDropDown>
-          <timeTargetWasSelectedWithDropDown value="2024-06-24T15:34:27.618413Z" />
+          <timeTargetWasSelectedWithDropDown value="2024-06-25T07:27:27.811014200Z" />
         </State>
-      </entry>
-      <entry key="profileScreen">
-        <State />
       </entry>
     </value>
   </component>
