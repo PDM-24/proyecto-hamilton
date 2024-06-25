@@ -59,4 +59,15 @@ interface ApiService {
     ): Call<ResponseBody>
 
     //Delete Task
+
+    //join team
+    @Headers(value= ["Content-Type: application/json"])
+    @POST(value= Constants.API_PATH + Constants.TEAM_PATH+"/joinByCode")
+    fun joinTeamByCode(@Body joinRequest: JoinTeamRequest): Call<ResponseBody>
+
+    data class JoinTeamRequest(
+        val userId: String,
+        val teamCode: String
+    )
+
 }

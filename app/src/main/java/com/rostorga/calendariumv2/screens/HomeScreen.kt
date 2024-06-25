@@ -51,6 +51,9 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.navigation.NavController
+import com.rostorga.calendariumv2.api.apiObject.TaskApiObject
+import com.rostorga.calendariumv2.api.apiObject.TaskDurationObject
+import com.rostorga.calendariumv2.objects.UserManager
 import com.rostorga.calendariumv2.screens.num
 import com.rostorga.calendariumv2.viewModel.ApiViewModel
 
@@ -161,7 +164,8 @@ fun FAB(navController: NavController, userViewModel: UserViewModel = viewModel()
             onNext = { showDialog = false },
             userViewModel = userViewModel,
             selectedDate = selectedDate,
-            navController = navController
+            navController = navController,
+            apiViewModel = ApiViewModel()
         )
     }
 
@@ -182,7 +186,8 @@ fun AddTaskPopUp(
     onNext: ()-> Unit,
     userViewModel: UserViewModel,
     selectedDate: String,
-    navController: NavController
+    navController: NavController,
+    apiViewModel: ApiViewModel
 ) {
     var task by remember { mutableStateOf("") }
     var taskDesc by remember { mutableStateOf("") }
@@ -190,6 +195,8 @@ fun AddTaskPopUp(
     val timeState2 = rememberTimePickerState(13, 30, false)
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    val userId = UserManager.getUser()
 
     Dialog(onDismissRequest = onDismiss) {
         Box(
@@ -241,6 +248,7 @@ fun AddTaskPopUp(
                     onClick = {
                         val startTime = String.format("%02d:%02d", timeState1.hour, timeState1.minute)
                         val endTime = String.format("%02d:%02d", timeState2.hour, timeState2.minute)
+                        val dateParts = selectedDate.split("/").map { it.trim().toInt() }
                         val taskData = TaskData(
                             TaskName = task,
                             TaskDesc = taskDesc,
@@ -253,6 +261,18 @@ fun AddTaskPopUp(
                         scope.launch {
                             userViewModel.addTask(taskData)
                             Toast.makeText(context, "Task added!", Toast.LENGTH_SHORT).show()
+
+                            val taskApiObject = TaskApiObject(
+                                name = task,
+                                description = taskDesc,
+                                day=dateParts[0],
+                                month=dateParts[1],
+                                year=dateParts[2],
+                                time = TaskDurationObject(start = startTime.replace(":", "").toInt(), end = endTime.replace(":", "").toInt()),
+                                userRef=userId.toString()
+                            )
+                            apiViewModel.postTask(taskApiObject, "")
+
                         }
 
                         navController.navigate("calendar")
@@ -311,16 +331,10 @@ fun HomeScreenContent(navController: NavController, userViewModel: UserViewModel
     var date by remember { mutableStateOf("") }
     val currentUserId by apiViewModel.currentUserId.observeAsState()
 
-
     var showCreateTeam by remember { mutableStateOf(false) }
 
     if (showCreateTeam) {
-        currentUserId?.let { userId ->
-            CreateOrJoinTeam(userId = userId, onDismiss = { showCreateTeam = false }, userViewModel=userViewModel, apiViewModel)
-        } ?: run {
-            // Handle null user ID: show error message or log out
-            Log.e("HomeScreenContent", "User ID is null. User might not be logged in.")
-        }
+            CreateOrJoinTeam( onDismiss = { showCreateTeam = false }, userViewModel=userViewModel, apiViewModel)
     }
 
     val stroke = Stroke(
@@ -425,15 +439,3 @@ fun HomeScreenContent(navController: NavController, userViewModel: UserViewModel
     }
 }
 
-
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true)
-@Composable
-fun AddTaskPopUpPreview() {
-    AddTaskPopUp(onDismiss = {},
-        onNext = {},
-        userViewModel = UserViewModel(application = Application()),
-        selectedDate = "01 - 01 - 2023",
-        navController = NavController(LocalContext.current))
-}

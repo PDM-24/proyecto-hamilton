@@ -18,6 +18,16 @@ import kotlinx.coroutines.withContext
 
 class UserViewModel(application: Application) : AndroidViewModel(application) {
 
+    val currentUserId = MutableLiveData<String?>()
+
+    fun setUserLoggedIn(userId: String) {
+        currentUserId.value = userId
+    }
+
+    fun logUserOut() {
+        currentUserId.value = null
+    }
+
     val getAllData: LiveData<List<UserData>>
     private val repository: UserRepo
     private val _usersWithTeams = MutableLiveData<List<UserWithTeams>>()

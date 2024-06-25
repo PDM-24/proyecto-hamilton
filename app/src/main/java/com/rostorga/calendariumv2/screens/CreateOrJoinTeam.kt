@@ -27,7 +27,6 @@ import com.rostorga.calendariumv2.viewModel.UserViewModel
 
 @Composable
 fun CreateOrJoinTeam(
-    userId: String,  // Add this line
     onDismiss:()->Unit,
     userViewModel: UserViewModel,
     apiViewModel: ApiViewModel
@@ -36,12 +35,12 @@ fun CreateOrJoinTeam(
 
     var showJoinTeam by remember { mutableStateOf(false) }
     if (showJoinTeam) {
-        JoinTeam(onDismiss = { showJoinTeam = false }, userViewModel = userViewModel)
+        JoinTeam(onDismiss = { showJoinTeam = false }, userViewModel = userViewModel, apiViewModel = apiViewModel)
     }
 
     var showCreateTeam by remember { mutableStateOf(false) }
     if (showCreateTeam) {
-        CreateTeam(userId = userId, onDismiss = { showCreateTeam = false }, userViewModel = userViewModel, apiViewModel = apiViewModel)
+        CreateTeam(onDismiss = { showCreateTeam = false }, apiViewModel = apiViewModel)
     }
 
 

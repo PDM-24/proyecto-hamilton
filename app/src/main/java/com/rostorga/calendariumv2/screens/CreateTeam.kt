@@ -1,5 +1,6 @@
 package com.rostorga.calendariumv2.screens
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -25,23 +26,28 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rostorga.calendariumv2.api.apiObject.TeamApiObject
 import com.rostorga.calendariumv2.data.database.entities.TeamData
+import com.rostorga.calendariumv2.objects.UserManager
 import com.rostorga.calendariumv2.viewModel.ApiViewModel
 import com.rostorga.calendariumv2.viewModel.UserViewModel
 import kotlinx.coroutines.launch
-@Composable
+import kotlin.random.Random
+
+
+fun generateRandomCode(): String = List(6) { Random.nextInt(0, 10) }.joinToString("")
+
+@SuppressLint("RememberReturnType")@Composable
 fun CreateTeam(
-    userId: String,  // Ensure this parameter is accepted
     onDismiss: () -> Unit,
-    userViewModel: UserViewModel = viewModel(),
     apiViewModel: ApiViewModel = viewModel()
 ) {
     var teamName by remember { mutableStateOf(TextFieldValue("")) }
-    var teamCode by remember { mutableStateOf(TextFieldValue("")) }
-
-    val currentUserId by apiViewModel.currentUserId.observeAsState()
+    val teamCode = remember { generateRandomCode() }  // Auto-generated team code
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    // Retrieve the user ID from UserManager
+    val userId = UserManager.getUser()
 
     Dialog(onDismissRequest = { onDismiss() }) {
         Box(
@@ -52,65 +58,40 @@ fun CreateTeam(
                 .background(Color(0xFFFFC64B)),
             contentAlignment = Alignment.Center
         ) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(text = "Let's give it a name!", color = Color.White, fontSize = 20.sp)
-                    Spacer(modifier = Modifier.height(20.dp))
+                Text(text = "Let's give it a name!", color = Color.White, fontSize = 20.sp)
+                Spacer(modifier = Modifier.height(20.dp))
 
-                    OutlinedTextField(
-                        value = teamName,
-                        onValueChange = { teamName = it },
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.height(64.dp),
-                        placeholder = {
-                            Text(text = " Ex: Best Team Ever! ", color = Color.White)
-                        }
-                    )
+                OutlinedTextField(
+                    value = teamName,
+                    onValueChange = { teamName = it },
+                    label = { Text("Team Name") },
+                    placeholder = { Text(text = " Ex: Best Team Ever! ", color = Color.White) }
+                )
+                Text("Team Code: $teamCode")  // Display auto-generated code
+                Spacer(modifier = Modifier.height(20.dp))
 
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    OutlinedTextField(
-                        value = teamCode,
-                        onValueChange = { teamCode = it },
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.height(64.dp),
-                        placeholder = {
-                            Text(text = " Ex: 123456 ", color = Color.White)
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    Button(
-                        onClick = {
+                Button(
+                    onClick = {
+                        if (userId != null && teamName.text.isNotEmpty()) {
                             scope.launch {
-                                if (teamName.text.isNotBlank() && teamCode.text.isNotBlank() && currentUserId != null) {
-                                    // Create TeamApiObject with current user's ID as the leader
-                                    val apiTeam = TeamApiObject(
-                                        name = teamName.text,
-                                        code = teamCode.text,
-                                        leader = currentUserId!! // Assuming 'leader' is a String. Adjust if necessary
-                                    )
-                                    apiViewModel.postTeam(apiTeam)
-                                } else {
-                                    Toast.makeText(context, "Please ensure all fields are filled and you are logged in.", Toast.LENGTH_LONG).show()
-                                }
+                                val team = TeamApiObject(
+                                    name = teamName.text,
+                                    code = teamCode,
+                                    leader = userId
+                                )
+                                apiViewModel.postTeam(team)
                             }
-                        },
-                        modifier = Modifier.width(200.dp)
-                    ) {
-                        Text("Create Team")
-                    }
+                        } else {
+                            Toast.makeText(context, "Please ensure you are logged in and all fields are filled.", Toast.LENGTH_LONG).show()
+                        }
+                    },
+                    modifier = Modifier.width(200.dp)
+                ) {
+                    Text("Create Team")
                 }
             }
         }

@@ -12,11 +12,13 @@ import retrofit2.Response
 import okhttp3.ResponseBody
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import com.rostorga.calendariumv2.api.ApiService
 import com.rostorga.calendariumv2.api.apiObject.TaskApiObject
 import com.rostorga.calendariumv2.api.apiObject.TaskDurationObject
 import com.rostorga.calendariumv2.api.apiObject.TeamApiObject
 import com.rostorga.calendariumv2.api.apiObject.UserLogin
 import com.rostorga.calendariumv2.api.apiObject.UserNameApiObject
+import com.rostorga.calendariumv2.objects.UserManager
 import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
@@ -253,8 +255,11 @@ class ApiViewModel : ViewModel() {
                                 val userId = userData.optString("_id", "N/A")
                                 if (userId != "N/A") {
                                     currentUserId.postValue(userId)
-                                    //                                    loginResponse.postValue("Login successful! User ID: $userId")
+                                    UserManager.setUser(userId)
+                                    //loginResponse.postValue("Login successful! User ID: $userId")
                                     loginResponse.postValue("Login successful!")
+                                    Log.d("ApiViewModel", "Logged in User ID: $userId")
+
                                 } else {
                                     loginResponse.postValue("Login failed: User ID not found in response")
                                     Log.e("ApiViewModel", "User ID not found in JSON response")
@@ -281,6 +286,27 @@ class ApiViewModel : ViewModel() {
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 loginResponse.postValue("Login failed, check your network connection!")
                 Log.e("ApiViewModel", "Network call failed", t)
+            }
+        })
+    }
+    //join team
+    fun apiJoinTeam(userId: String, teamCode: String) {
+        val joinRequest = ApiService.JoinTeamRequest(userId, teamCode)
+        val call = ApiClient.apiService.joinTeamByCode(joinRequest)
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                if (response.isSuccessful) {
+                    Log.d("jointeam", response.body().toString())
+
+                    // Handle success, maybe update UI or state
+                } else {
+                    val errorMessage = response.errorBody()?.string() ?: "Failed to join team"
+                    Log.d("jointeam", errorMessage)
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                // Handle network errors or other unexpected errors
             }
         })
     }

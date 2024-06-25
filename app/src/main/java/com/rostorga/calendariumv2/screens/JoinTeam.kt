@@ -1,6 +1,7 @@
 package com.rostorga.calendariumv2.screens
 
 import android.app.Application
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +35,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.rostorga.calendariumv2.objects.UserManager
+import com.rostorga.calendariumv2.viewModel.ApiViewModel
 import com.rostorga.calendariumv2.viewModel.UserViewModel
 import kotlinx.coroutines.launch
 
@@ -41,8 +44,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun JoinTeam(
     onDismiss:()->Unit,
-    userViewModel: UserViewModel
-
+    userViewModel: UserViewModel,
+    apiViewModel: ApiViewModel
 ) {
 
     val context = LocalContext.current
@@ -50,6 +53,8 @@ fun JoinTeam(
     var teamCode by remember { mutableStateOf(" ") }
     val users by userViewModel.getAllData.observeAsState(initial = emptyList())
     val scope = rememberCoroutineScope()
+
+    val joinTeamUserId = UserManager.getUser()
 
 
     Dialog(onDismissRequest = { onDismiss() }){
@@ -98,14 +103,21 @@ fun JoinTeam(
 
                     Button(
                         onClick = {
-                            scope.launch {
-                                if (users.isNotEmpty()){
-                                    val user = users.first()
-                                    userViewModel.joinTeam(user.id,teamCode)
-                                    Toast.makeText(context, "You joined the team! Welcome!", Toast.LENGTH_SHORT).show()
-                                    onDismiss()// to delete it after
+                            try{
+                                if (teamCode.isNotBlank()) {
+                                scope.launch {
+                                    apiViewModel.apiJoinTeam(joinTeamUserId.toString(), teamCode.toString())
+                                    Toast.makeText(context, "Successfully joined the team!", Toast.LENGTH_SHORT).show()
+
                                 }
+                            } else {
+                                Toast.makeText(context, "Please enter a valid team code.", Toast.LENGTH_SHORT).show()
+                            }}
+                            catch(e:Exception){
+                                Log.d("jointeam", "cannot join team", e)
+
                             }
+
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                     ) {
@@ -121,16 +133,5 @@ fun JoinTeam(
         }
 
     }
-}
-
-
-
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewJoinTeam() {
-    JoinTeam(onDismiss = {}, userViewModel = UserViewModel(application = Application()))
 }
 
