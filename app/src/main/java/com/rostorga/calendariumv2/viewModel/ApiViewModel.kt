@@ -127,14 +127,13 @@ class ApiViewModel : ViewModel() {
     fun postUser(requestData: UserApiObject): UserApiObject {
         val call = ApiClient.apiService.postUser(requestData)
         var returnUser: UserApiObject = UserApiObject(
-            UserNameApiObject("", ""),
-            "", "", ""
-        )
+            UserNameApiObject("", ""), "", "", "")
 
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 response.body()?.let {
                     returnUser = convertUser(it)
+                    _registeredUserId.value = returnUser.id
                 }
             }
 
@@ -254,7 +253,8 @@ class ApiViewModel : ViewModel() {
                                 val userId = userData.optString("_id", "N/A")
                                 if (userId != "N/A") {
                                     currentUserId.postValue(userId)
-                                    loginResponse.postValue("Login successful! User ID: $userId")
+                                    //                                    loginResponse.postValue("Login successful! User ID: $userId")
+                                    loginResponse.postValue("Login successful!")
                                 } else {
                                     loginResponse.postValue("Login failed: User ID not found in response")
                                     Log.e("ApiViewModel", "User ID not found in JSON response")

@@ -3,7 +3,6 @@ package com.rostorga.calendariumv2
 
 import CalendarFAB
 import CalendarScreen
-import CalendarScreenContainer
 import ViewContainer
 import android.annotation.SuppressLint
 import android.os.Build
@@ -11,21 +10,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -59,7 +53,7 @@ fun MyApp() {
     val userViewModel: UserViewModel = viewModel()
     val apiViewModel: ApiViewModel = ApiViewModel()
 
-    NavHost(navController, startDestination = "home") {
+    NavHost(navController, startDestination = "login") {
         composable("home") {
             ViewContainer(navController, apiViewModel )
         }
